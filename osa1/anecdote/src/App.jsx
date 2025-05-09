@@ -13,15 +13,34 @@ const App = () => {
 	];
 
 	const [selected, setSelected] = useState(0);
+	const [voteArr, setVoteArr] = useState([]);
 
 	const handleButtonClick = () => {
 		const newIndex = Math.floor(Math.random() * anecdotes.length);
 
 		setSelected(newIndex);
 	};
+
+	const handleVote = (index) => {
+		const newArr = [...voteArr];
+		if (!newArr[index]) {
+			newArr[index] = 1;
+		} else {
+			newArr[index] += 1;
+		}
+		setVoteArr(newArr);
+	};
 	return (
 		<div>
 			<div>{anecdotes[selected]}</div>
+			<div>has {voteArr[selected] ?? 0} votes</div>
+			<button
+				onClick={() => {
+					handleVote(selected);
+				}}
+			>
+				vote
+			</button>
 			<button onClick={handleButtonClick}>next anecdote</button>
 		</div>
 	);
