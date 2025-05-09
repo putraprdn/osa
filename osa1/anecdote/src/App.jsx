@@ -14,6 +14,7 @@ const App = () => {
 
 	const [selected, setSelected] = useState(0);
 	const [voteArr, setVoteArr] = useState([]);
+	const [mostVoted, setMostVoted] = useState(0); // store index of favorited anecdotes
 
 	const handleButtonClick = () => {
 		const newIndex = Math.floor(Math.random() * anecdotes.length);
@@ -23,25 +24,44 @@ const App = () => {
 
 	const handleVote = (index) => {
 		const newArr = [...voteArr];
-		if (!newArr[index]) {
-			newArr[index] = 1;
-		} else {
-			newArr[index] += 1;
+		newArr[index] = !newArr[index] ? 1 : newArr[index] + 1;
+
+		const mostVotedAnecdote = newArr[mostVoted] ?? 0;
+		const totalRecentVoted = newArr[index];
+
+		console.log(
+			`recent vote: ${totalRecentVoted} \n most voted: ${mostVotedAnecdote} \n current index: ${index}`
+		);
+
+		if (totalRecentVoted > mostVotedAnecdote) {
+			console.log("true");
+			setMostVoted(index);
 		}
+
+		console.log(`most voted: ${mostVoted}`);
 		setVoteArr(newArr);
 	};
 	return (
 		<div>
-			<div>{anecdotes[selected]}</div>
-			<div>has {voteArr[selected] ?? 0} votes</div>
-			<button
-				onClick={() => {
-					handleVote(selected);
-				}}
-			>
-				vote
-			</button>
-			<button onClick={handleButtonClick}>next anecdote</button>
+			<div>
+				<h1>Anecdote of the day</h1>
+				<div>{anecdotes[selected]}</div>
+				<div>has {voteArr[selected] ?? 0} votes</div>
+				<button
+					onClick={() => {
+						handleVote(selected);
+					}}
+				>
+					vote
+				</button>
+				<button onClick={handleButtonClick}>next anecdote</button>
+			</div>
+
+			<div>
+				<h2>Anecdote with most votes</h2>
+				<p>{anecdotes[mostVoted]}</p>
+				<span>has {voteArr[mostVoted] ?? 0} votes</span>
+			</div>
 		</div>
 	);
 };
