@@ -4,6 +4,46 @@ const App = () => {
 	const [good, setGood] = useState(0);
 	const [neutral, setNeutral] = useState(0);
 	const [bad, setBad] = useState(0);
+	const [all, setAll] = useState(0);
+	const [average, setAverage] = useState(0);
+	const [positive, setPositive] = useState(0);
+
+	const GOOD_VALUE = 1;
+	const NEUTRAL_VALUE = 0;
+	const BAD_VALUE = -1;
+
+	const handleButtonClick = (type) => {
+		let newGood = good;
+		let newNeutral = neutral;
+		let newBad = bad;
+
+		switch (type) {
+			case "good":
+				newGood = good + 1;
+				setGood(newGood);
+				break;
+			case "neutral":
+				newNeutral = neutral + 1;
+				setNeutral(newNeutral);
+				break;
+			case "bad":
+				newBad = bad + 1;
+				setBad(newBad);
+				break;
+			default:
+				break;
+		}
+
+		const newAll = newGood + newNeutral + newBad;
+		setAll(newAll);
+		setAverage(
+			(newGood * GOOD_VALUE +
+				newNeutral * NEUTRAL_VALUE +
+				newBad * BAD_VALUE) /
+				newAll
+		);
+		setPositive((newGood / newAll) * 100);
+	};
 
 	return (
 		<div>
@@ -12,21 +52,21 @@ const App = () => {
 			<div>
 				<button
 					onClick={() => {
-						setGood(good + 1);
+						handleButtonClick("good");
 					}}
 				>
 					good
 				</button>
 				<button
 					onClick={() => {
-						setNeutral(neutral + 1);
+						handleButtonClick("neutral");
 					}}
 				>
 					neutral
 				</button>
 				<button
 					onClick={() => {
-						setBad(bad + 1);
+						handleButtonClick("bad");
 					}}
 				>
 					bad
@@ -34,15 +74,14 @@ const App = () => {
 			</div>
 
 			<h2>statistics</h2>
-			<p style={{ margin: 0 }}>
-				good <span>{good}</span>
-			</p>
-			<p style={{ margin: 0 }}>
-				neutral <span>{neutral}</span>
-			</p>
-			<p style={{ margin: 0 }}>
-				bad <span>{bad}</span>
-			</p>
+			<div>
+				<div>good {good}</div>
+				<div>neutral {neutral}</div>
+				<div>bad {bad}</div>
+				<div>all {all}</div>
+				<div>average {average}</div>
+				<div>positive {positive}%</div>
+			</div>
 		</div>
 	);
 };
