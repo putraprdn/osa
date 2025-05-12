@@ -11,6 +11,11 @@ const App = () => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
+		const isDuplicated = persons.find((person) => person.name === newName);
+		if (isDuplicated) {
+			alert(`${newName} is already added to phonebook`);
+			return;
+		}
 
 		const newPerson = persons.concat({ name: newName });
 		setPersons(newPerson);
