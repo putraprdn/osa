@@ -4,6 +4,7 @@ import {
 	createPhoneBook,
 	deletePhoneBook,
 	getAllPhoneBooks,
+	updatePhoneBook,
 } from "./services/phones";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
@@ -41,15 +42,31 @@ const App = () => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		const isDuplicated = persons.find((person) => person.name === newName);
-		if (isDuplicated) {
-			alert(`${newName} is already added to phonebook`);
-			return;
-		}
 		const newPersonObj = {
 			name: newName,
 			number: newNumber,
 		};
+
+		const isDuplicated = persons.find((person) => {
+			return person.name === newName;
+		});
+
+		if (isDuplicated) {
+			const { id, name } = isDuplicated;
+			const isConfirmed = confirm(
+				`${name} is already added to phonebook, replace the old number with a new one?`
+			);
+			if (!isConfirmed) return;
+
+			updatePhoneBook(id, newPersonObj).then((response) => {
+				setPersons((prev) =>
+					prev.map((person) =>
+						person.id === id ? response.data : person
+					)
+				);
+			});
+			return;
+		}
 
 		createPhoneBook(newPersonObj)
 			.then((response) => {
