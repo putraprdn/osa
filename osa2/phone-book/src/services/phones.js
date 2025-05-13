@@ -12,3 +12,7 @@ export const createPhoneBook = (newObject) => {
 export const updatePhoneBook = (id, newObject) => {
 	return axios.put(`${baseUrl}/${id}`, newObject);
 };
+
+export const deletePhoneBook = (id) => {
+	return axios.delete(`${baseUrl}/${id}`);
+};

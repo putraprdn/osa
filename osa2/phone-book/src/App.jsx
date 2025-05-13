@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { createPhoneBook, getAllPhoneBooks } from "./services/phones";
+import {
+	createPhoneBook,
+	deletePhoneBook,
+	getAllPhoneBooks,
+} from "./services/phones";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
@@ -72,6 +76,18 @@ const App = () => {
 		setFilteredPersons(filteredArr);
 	};
 
+	const handleDelete = (id) => {
+		const person = persons.find((p) => p.id === id);
+		const isConfirmed = confirm(`Delete ${person.name}?`);
+		if (!isConfirmed) return;
+
+		deletePhoneBook(id)
+			.then(() => {
+				setPersons(persons.filter((p) => p.id !== id));
+			})
+			.catch(console.log);
+	};
+
 	const listToShow = filterValue ? filteredPersons : persons;
 
 	return (
@@ -94,7 +110,10 @@ const App = () => {
 
 			<h3>Numbers</h3>
 
-			<Persons persons={listToShow} />
+			<Persons
+				handleDelete={handleDelete}
+				persons={listToShow}
+			/>
 		</div>
 	);
 };
