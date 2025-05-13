@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import {
 	createPhoneBook,
 	deletePhoneBook,
@@ -9,6 +8,7 @@ import {
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
+import Notification from "./components/Notification";
 
 const App = () => {
 	const [persons, setPersons] = useState([]);
@@ -16,8 +16,7 @@ const App = () => {
 	const [newNumber, setNewNumber] = useState("");
 	const [filterValue, setFilterValue] = useState("");
 	const [filteredPersons, setFilteredPersons] = useState([]);
-
-	const BASE_URL = "http://localhost:3001/persons";
+	const [notification, setNotification] = useState({ type: "", msg: "" });
 
 	useEffect(() => {
 		const data = getAllPhoneBooks().then((response) => {
@@ -25,6 +24,13 @@ const App = () => {
 			console.log(response.data);
 		});
 	}, []);
+
+	const handleShowNotification = (type, msg) => {
+		setNotification({ type, msg });
+		setTimeout(() => {
+			setNotification({ type: "", msg: "" });
+		}, 5000);
+	};
 
 	const handleChange = (e) => {
 		const value = e.target.value;
@@ -48,7 +54,7 @@ const App = () => {
 		};
 
 		const isDuplicated = persons.find((person) => {
-			return person.name === newName;
+			return person.name == newName;
 		});
 
 		if (isDuplicated) {
@@ -58,13 +64,25 @@ const App = () => {
 			);
 			if (!isConfirmed) return;
 
-			updatePhoneBook(id, newPersonObj).then((response) => {
-				setPersons((prev) =>
-					prev.map((person) =>
-						person.id === id ? response.data : person
-					)
-				);
-			});
+			updatePhoneBook(id, newPersonObj)
+				.then((response) => {
+					setPersons((prev) =>
+						prev.map((person) =>
+							person.id === id ? response.data : person
+						)
+					);
+					handleShowNotification(
+						"success",
+						`Updated ${response.data.name} number`
+					);
+				})
+				.catch((error) => {
+					console.log(error);
+					handleShowNotification("error", error);
+				});
+
+			setNewName("");
+			setNewNumber("");
 			return;
 		}
 
@@ -72,9 +90,14 @@ const App = () => {
 			.then((response) => {
 				console.log(response);
 				setPersons(persons.concat(response.data));
+				handleShowNotification(
+					"success",
+					`Added ${response.data.name}`
+				);
 			})
 			.catch((error) => {
 				console.log(error);
+				handleShowNotification("error", error);
 			});
 
 		setNewName("");
@@ -101,8 +124,16 @@ const App = () => {
 		deletePhoneBook(id)
 			.then(() => {
 				setPersons(persons.filter((p) => p.id !== id));
+				handleShowNotification("success", `Deleted ${person.name}`);
 			})
-			.catch(console.log);
+			.catch((error) => {
+				console.log(error);
+				handleShowNotification(
+					"error",
+					`Information of ${person.name} is not found`
+				);
+				setPersons(persons.filter((p) => p.id !== id));
+			});
 	};
 
 	const listToShow = filterValue ? filteredPersons : persons;
@@ -110,6 +141,11 @@ const App = () => {
 	return (
 		<div>
 			<h2>Phonebook</h2>
+
+			<Notification
+				type={notification.type}
+				msg={notification.msg}
+			/>
 
 			<Filter
 				value={filterValue}
