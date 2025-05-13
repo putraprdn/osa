@@ -78,7 +78,7 @@ const App = () => {
 				})
 				.catch((error) => {
 					console.log(error);
-					handleShowNotification("error", error);
+					handleShowNotification("error", error.message);
 				});
 
 			setNewName("");
@@ -97,7 +97,7 @@ const App = () => {
 			})
 			.catch((error) => {
 				console.log(error);
-				handleShowNotification("error", error);
+				handleShowNotification("error", error.message);
 			});
 
 		setNewName("");
@@ -128,10 +128,13 @@ const App = () => {
 			})
 			.catch((error) => {
 				console.log(error);
-				handleShowNotification(
-					"error",
-					`Information of ${person.name} is not found`
-				);
+				let msg = `Information of ${person.name} is not found`;
+
+				if (error.response.status == 404) {
+					msg = `Information of ${person.name} has already been removed from server`;
+				}
+
+				handleShowNotification("error", msg);
 				setPersons(persons.filter((p) => p.id !== id));
 			});
 	};
