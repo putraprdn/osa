@@ -4,6 +4,7 @@ import axios from "axios";
 const App = () => {
 	const [search, setSearch] = useState("");
 	const [countries, setCountries] = useState([]);
+	const [filtered, setFiltered] = useState([]);
 
 	useEffect(() => {
 		axios
@@ -11,16 +12,27 @@ const App = () => {
 			.then((res) => setCountries(res.data))
 			.catch(console.error);
 	}, []);
-
+  
 	const handleSearchChange = (e) => {
-		setSearch(e.target.value);
+		const value = e.target.value;
+		setSearch(value);
+
+		const cleanArr = value.trim()
+			? countries.filter((c) =>
+					c.name.common.toLowerCase().includes(value.toLowerCase())
+			  )
+			: [];
+
+		setFiltered(cleanArr);
 	};
 
-	const filtered = search.trim()
-		? countries.filter((c) =>
-				c.name.common.toLowerCase().includes(search.toLowerCase())
-		  )
-		: [];
+	const handleClick = (name) => {
+		const getCountry = countries.find((country) => {
+			return country.name.official === name;
+		});
+		setFiltered([getCountry]);
+		return;
+	};
 
 	return (
 		<>
@@ -60,7 +72,16 @@ const App = () => {
 			{filtered.length <= 10 && filtered.length > 1 && (
 				<>
 					{filtered.map((c) => (
-						<div key={c.name.official}>{c.name.common}</div>
+						<div key={c.name.official}>
+							{c.name.common}{" "}
+							<button
+								onClick={() => {
+									handleClick(c.name.official);
+								}}
+							>
+								Show
+							</button>
+						</div>
 					))}
 				</>
 			)}
