@@ -1,4 +1,5 @@
 const express = require("express");
+const morgan = require("morgan");
 
 const app = express();
 const PORT = 3001;
@@ -32,6 +33,7 @@ const generateId = () => {
 };
 
 app.use(express.json());
+app.use(morgan("tiny"));
 
 app.get("/", (req, res) => {
 	return res.send("<h1>Hello World</1>");
