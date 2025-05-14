@@ -26,6 +26,11 @@ let persons = [
 	},
 ];
 
+const generateId = () => {
+	const randId = Math.floor(100000 + Math.random() * 900000);
+	return randId.toString();
+};
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -55,11 +60,23 @@ app.get("/api/persons/:id", (req, res) => {
 
 app.delete("/api/persons/:id", (req, res) => {
 	const { id } = req.params;
-	const filteredPersons = persons.filter((c) => c.id !== id);
-
-	if (filteredPersons.length === persons.length) return res.status(404).end();
+	persons = persons.filter((c) => c.id !== id);
 
 	return res.status(204).end();
+});
+
+app.post("/api/persons", (req, res) => {
+	const { name, number } = req.body;
+
+	const newPersonObj = {
+		name,
+		number,
+		id: generateId(),
+	};
+
+	persons = persons.concat(newPersonObj);
+
+	res.json(persons);
 });
 
 app.listen(PORT, () => {
