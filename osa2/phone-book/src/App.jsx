@@ -89,7 +89,7 @@ const App = () => {
 		createPhoneBook(newPersonObj)
 			.then((response) => {
 				console.log(response);
-				setPersons(persons.concat(response.data));
+				setPersons(response.data);
 				handleShowNotification(
 					"success",
 					`Added ${response.data.name}`
