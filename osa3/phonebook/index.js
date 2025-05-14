@@ -32,6 +32,14 @@ app.get("/", (req, res) => {
 	return res.send("<h1>Hello World</1>");
 });
 
+app.get("/info", (req, res) => {
+	const totalPersons = persons.length;
+	const currentDateTime = new Date().toUTCString();
+	const htmlTemp = `<p>Phonebook has info for ${totalPersons} people</p><p>${currentDateTime}</p>`;
+
+	return res.send(htmlTemp);
+});
+
 app.get("/api/persons", (req, res) => {
 	return res.json(persons);
 });
