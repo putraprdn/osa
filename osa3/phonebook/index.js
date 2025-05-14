@@ -53,6 +53,15 @@ app.get("/api/persons/:id", (req, res) => {
 	return res.json(person);
 });
 
+app.delete("/api/persons/:id", (req, res) => {
+	const { id } = req.params;
+	const filteredPersons = persons.filter((c) => c.id !== id);
+
+	if (filteredPersons.length === persons.length) return res.status(404).end();
+
+	return res.status(204).end();
+});
+
 app.listen(PORT, () => {
 	console.log(`Server started on ${PORT}`);
 });
