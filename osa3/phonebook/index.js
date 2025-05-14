@@ -68,6 +68,18 @@ app.delete("/api/persons/:id", (req, res) => {
 app.post("/api/persons", (req, res) => {
 	const { name, number } = req.body;
 
+	if (!name || !number) {
+		return res
+			.status(400)
+			.json({ message: "Name and Number must be filled" });
+	}
+
+	const isNameDuplicated = persons.find((c) => c.name === name);
+
+	if (isNameDuplicated) {
+		return res.status(409).json({ error: "name must be unique" });
+	}
+
 	const newPersonObj = {
 		name,
 		number,
@@ -76,7 +88,7 @@ app.post("/api/persons", (req, res) => {
 
 	persons = persons.concat(newPersonObj);
 
-	res.json(persons);
+	res.status(201).json(persons);
 });
 
 app.listen(PORT, () => {
