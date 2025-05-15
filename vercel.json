@@ -1,0 +1,38 @@
+{
+	"version": 2,
+	"builds": [
+		{
+			"src": "osa3/phonebook/index.js",
+			"use": "@vercel/node"
+		},
+		{
+			"src": "osa3/phonebook/dist/**",
+			"use": "@vercel/static"
+		}
+	],
+	"routes": [
+		{
+			"src": "/api/(.*)",
+			"dest": "osa3/phonebook/index.js"
+		},
+		{
+			"src": "/assets/(.*\\.js)",
+			"dest": "osa3/phonebook/dist/assets/$1",
+			"headers": {
+				"Content-Type": "application/javascript"
+			}
+		},
+		{
+			"src": "/assets/(.*\\.(css|png|jpg|svg|ico))",
+			"dest": "osa3/phonebook/dist/assets/$1"
+		},
+		{
+			"src": "/vite\\.svg",
+			"dest": "osa3/phonebook/dist/vite.svg"
+		},
+		{
+			"src": "/(.*)",
+			"dest": "osa3/phonebook/dist/index.html"
+		}
+	]
+}

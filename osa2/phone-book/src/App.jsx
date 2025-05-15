@@ -73,7 +73,7 @@ const App = () => {
 					);
 					handleShowNotification(
 						"success",
-						`Updated ${response.data.name} number`
+						`Updated ${newName} number`
 					);
 				})
 				.catch((error) => {
@@ -90,9 +90,10 @@ const App = () => {
 			.then((response) => {
 				console.log(response);
 				setPersons(response.data);
+				console.log(newName)
 				handleShowNotification(
 					"success",
-					`Added ${response.data.name}`
+					`Added ${newName}`
 				);
 			})
 			.catch((error) => {
