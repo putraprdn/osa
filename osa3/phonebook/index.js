@@ -105,11 +105,13 @@ app.post("/api/persons", (req, res, next) => {
 			.json({ message: "Name and Number must be filled" });
 	}
 
-	// const isNameDuplicated = persons.find((c) => c.name === name);
-
-	// if (isNameDuplicated) {
-	// 	return res.status(409).json({ error: "name must be unique" });
-	// }
+	Person.find({ name })
+		.then((person) => {
+			if (person) {
+				return res.status(409).json({ error: "name must be unique" });
+			}
+		})
+		.catch((error) => next(error));
 
 	const newPerson = new Person({
 		name,
@@ -119,7 +121,21 @@ app.post("/api/persons", (req, res, next) => {
 	newPerson
 		.save()
 		.then((savedPerson) => {
-			return res.json(savedPerson);
+			return res.status(201).json(savedPerson);
+		})
+		.catch((error) => next(error));
+});
+
+app.put("/api/persons/:id", (req, res, next) => {
+	const { id } = req.params;
+	const { number } = req.body;
+	console.log(`number body: ${number}`);
+	console.log(`id: ${id}`);
+
+	Person.findByIdAndUpdate(id, { number }, { new: true })
+		.then((person) => {
+			console.log(`success: ${person}`);
+			return res.status(200).json(person);
 		})
 		.catch((error) => next(error));
 });

@@ -54,7 +54,7 @@ const App = () => {
 		};
 
 		const isDuplicated = persons.find((person) => {
-			return person.name == newName;
+			return person.name === newName;
 		});
 
 		if (isDuplicated) {
@@ -66,11 +66,12 @@ const App = () => {
 
 			updatePhoneBook(id, newPersonObj)
 				.then((response) => {
-					setPersons((prev) =>
-						prev.map((person) =>
-							person.id === id ? response.data : person
-						)
-					);
+					console.log(response.data);
+					setPersons((prev) => {
+						return prev.map((person) => {
+							return person.id === id ? response.data : person;
+						});
+					});
 					handleShowNotification(
 						"success",
 						`Updated ${newName} number`
