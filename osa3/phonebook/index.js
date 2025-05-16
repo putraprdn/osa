@@ -45,132 +45,132 @@ app.use(express.static(path.join(__dirname, "dist")));
 // 	res.sendFile(path.join(__dirname, "dist", "index.html"));
 // });
 
-morgan.token("body", function (req, res) {
-	return JSON.stringify(req.body);
+morgan.token("body", function (req) {
+  return JSON.stringify(req.body);
 });
 
 app.use(
-	morgan(
-		":method :url :status :response-time ms - :res[content-length] :body"
-	)
+  morgan(
+    ":method :url :status :response-time ms - :res[content-length] :body"
+  )
 );
 
 app.get("/info", (req, res, next) => {
-	Person.countDocuments({})
-		.then((result) => {
-			const totalDoc = result;
-			const currentDateTime = new Date().toUTCString();
-			const htmlTemp = `<p>Phonebook has info for ${totalDoc} people</p><p>${currentDateTime}</p>`;
-			return res.send(htmlTemp);
-		})
-		.catch((error) => next(error));
+  Person.countDocuments({})
+    .then((result) => {
+      const totalDoc = result;
+      const currentDateTime = new Date().toUTCString();
+      const htmlTemp = `<p>Phonebook has info for ${totalDoc} people</p><p>${currentDateTime}</p>`;
+      return res.send(htmlTemp);
+    })
+    .catch((error) => next(error));
 });
 
 app.get("/api/persons", (req, res, next) => {
-	Person.find({})
-		.then((result) => {
-			return res.json(result);
-		})
-		.catch((error) => next(error));
+  Person.find({})
+    .then((result) => {
+      return res.json(result);
+    })
+    .catch((error) => next(error));
 });
 
 app.get("/api/persons/:id", (req, res, next) => {
-	const { id } = req.params;
+  const { id } = req.params;
 
-	Person.findById(id)
-		.then((person) => {
-			if (!person) return res.status(404).end();
+  Person.findById(id)
+    .then((person) => {
+      if (!person) return res.status(404).end();
 
-			return res.json(person);
-		})
-		.catch((error) => next(error));
+      return res.json(person);
+    })
+    .catch((error) => next(error));
 });
 
 app.delete("/api/persons/:id", (req, res, next) => {
-	const { id } = req.params;
-	Person.findByIdAndDelete(id)
-		.then((result) => {
-			console.log(result);
-			return res.status(204).end();
-		})
-		.catch((error) => {
-			console.log(error);
-			next(error);
-		});
+  const { id } = req.params;
+  Person.findByIdAndDelete(id)
+    .then((result) => {
+      console.log(result);
+      return res.status(204).end();
+    })
+    .catch((error) => {
+      console.log(error);
+      next(error);
+    });
 });
 
 app.post("/api/persons", (req, res, next) => {
-	const { name, number } = req.body;
+  const { name, number } = req.body;
 
-	if (!name || !number) {
-		return res
-			.status(400)
-			.json({ message: "Name and Number must be filled" });
-	}
+  if (!name || !number) {
+    return res
+      .status(400)
+      .json({ message: "Name and Number must be filled" });
+  }
 
-	Person.find({ name })
-		.then((person) => {
-			if (person) {
-				return res.status(409).json({ error: "name must be unique" });
-			}
-		})
-		.catch((error) => next(error));
+  Person.find({ name })
+    .then((person) => {
+      if (person) {
+        return res.status(409).json({ error: "name must be unique" });
+      }
+    })
+    .catch((error) => next(error));
 
-	const newPerson = new Person({
-		name,
-		number,
-	});
+  const newPerson = new Person({
+    name,
+    number,
+  });
 
-	newPerson
-		.save()
-		.then((savedPerson) => {
-			return res.status(201).json(savedPerson);
-		})
-		.catch((error) => next(error));
+  newPerson
+    .save()
+    .then((savedPerson) => {
+      return res.status(201).json(savedPerson);
+    })
+    .catch((error) => next(error));
 });
 
 app.put("/api/persons/:id", (req, res, next) => {
-	const { id } = req.params;
-	const { number } = req.body;
+  const { id } = req.params;
+  const { number } = req.body;
 
-	Person.findByIdAndUpdate(
-		id,
-		{ number },
-		{
-			new: true,
-			runValidators: true,
-		}
-	)
-		.then((person) => {
-			// console.log(`success: ${person}`);
-			return res.status(200).json(person);
-		})
-		.catch((error) => next(error));
+  Person.findByIdAndUpdate(
+    id,
+    { number },
+    {
+      new: true,
+      runValidators: true,
+    }
+  )
+    .then((person) => {
+      // console.log(`success: ${person}`);
+      return res.status(200).json(person);
+    })
+    .catch((error) => next(error));
 });
 
 const unknownEndpoint = (request, response) => {
-	response.status(404).send({ error: "unknown endpoint" });
+  response.status(404).send({ error: "unknown endpoint" });
 };
 
 app.use(unknownEndpoint);
 
-const errorHandler = (error, req, res, next) => {
-	console.log(error.message);
-	console.log(error);
+const errorHandler = (error, _, res, next) => {
+  console.log(error.message);
+  console.log(error);
 
-	if (error.name === "CastError") {
-		return res.status(400).send({ error: "malformed id" });
-	} else if (error.name === "ValidationError") {
-		return res.status(400).json({ error: error.message });
-	}
+  if (error.name === "CastError") {
+    return res.status(400).send({ error: "malformed id" });
+  } else if (error.name === "ValidationError") {
+    return res.status(400).json({ error: error.message });
+  }
 
-	next(error);
+  next(error);
 };
 
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-	console.log(`Server started on ${PORT}`);
+  console.log(`Server started on ${PORT}`);
 });
 
 module.exports = app;
