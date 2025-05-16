@@ -132,12 +132,17 @@ app.post("/api/persons", (req, res, next) => {
 app.put("/api/persons/:id", (req, res, next) => {
 	const { id } = req.params;
 	const { number } = req.body;
-	console.log(`number body: ${number}`);
-	console.log(`id: ${id}`);
 
-	Person.findByIdAndUpdate(id, { number }, { new: true })
+	Person.findByIdAndUpdate(
+		id,
+		{ number },
+		{
+			new: true,
+			runValidators: true,
+		}
+	)
 		.then((person) => {
-			console.log(`success: ${person}`);
+			// console.log(`success: ${person}`);
 			return res.status(200).json(person);
 		})
 		.catch((error) => next(error));
@@ -151,9 +156,12 @@ app.use(unknownEndpoint);
 
 const errorHandler = (error, req, res, next) => {
 	console.log(error.message);
+	console.log(error);
 
 	if (error.name === "CastError") {
 		return res.status(400).send({ error: "malformed id" });
+	} else if (error.name === "ValidationError") {
+		return res.status(400).json({ error: error.message });
 	}
 
 	next(error);
