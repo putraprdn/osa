@@ -63,17 +63,15 @@ app.use(
 // 	return res.send(htmlTemp);
 // });
 
-app.get("/api/persons", (req, res) => {
+app.get("/api/persons", (req, res, next) => {
 	Person.find({})
 		.then((result) => {
 			return res.json(result);
 		})
-		.catch((error) => {
-			return res.status(500).json({ error: "Failed to fetch data" });
-		});
+		.catch((error) => next(error));
 });
 
-app.get("/api/persons/:id", (req, res) => {
+app.get("/api/persons/:id", (req, res, next) => {
 	const { id } = req.params;
 
 	Person.findById(id)
@@ -82,13 +80,10 @@ app.get("/api/persons/:id", (req, res) => {
 
 			return res.json(person);
 		})
-		.catch((error) => {
-			console.log(error);
-			res.status(500).end();
-		});
+		.catch((error) => next(error));
 });
 
-app.delete("/api/persons/:id", (req, res) => {
+app.delete("/api/persons/:id", (req, res, next) => {
 	const { id } = req.params;
 	Person.findByIdAndDelete(id)
 		.then((result) => {
@@ -97,11 +92,11 @@ app.delete("/api/persons/:id", (req, res) => {
 		})
 		.catch((error) => {
 			console.log(error);
-			return res.status(500).end();
+			next(error);
 		});
 });
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", (req, res, next) => {
 	const { name, number } = req.body;
 
 	if (!name || !number) {
@@ -126,10 +121,26 @@ app.post("/api/persons", (req, res) => {
 		.then((savedPerson) => {
 			return res.json(savedPerson);
 		})
-		.catch((error) => {
-			return res.status(500).json({ error });
-		});
+		.catch((error) => next(error));
 });
+
+const unknownEndpoint = (request, response) => {
+	response.status(404).send({ error: "unknown endpoint" });
+};
+
+app.use(unknownEndpoint);
+
+const errorHandler = (error, req, res, next) => {
+	console.log(error.message);
+
+	if (error.name === "CastError") {
+		return res.status(400).send({ error: "malformed id" });
+	}
+
+	next(error);
+};
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
 	console.log(`Server started on ${PORT}`);
