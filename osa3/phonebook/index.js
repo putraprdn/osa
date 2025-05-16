@@ -78,16 +78,27 @@ app.get("/api/persons/:id", (req, res) => {
 
 	Person.findById(id)
 		.then((person) => {
+			if (!person) return res.status(404).end();
+
 			return res.json(person);
 		})
-		.catch((error) => res.json(error).status(500));
+		.catch((error) => {
+			console.log(error);
+			res.status(500).end();
+		});
 });
 
 app.delete("/api/persons/:id", (req, res) => {
 	const { id } = req.params;
-	persons = persons.filter((c) => c.id !== id);
-
-	return res.status(204).end();
+	Person.findByIdAndDelete(id)
+		.then((result) => {
+			console.log(result);
+			return res.status(204).end();
+		})
+		.catch((error) => {
+			console.log(error);
+			return res.status(500).end();
+		});
 });
 
 app.post("/api/persons", (req, res) => {
