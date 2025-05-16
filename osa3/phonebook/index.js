@@ -41,9 +41,9 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname, "dist")));
 
-app.get(/^(?!\/api).*/, (req, res) => {
-	res.sendFile(path.join(__dirname, "dist", "index.html"));
-});
+// app.get(/^(?!\/api).*/, (req, res) => {
+// 	res.sendFile(path.join(__dirname, "dist", "index.html"));
+// });
 
 morgan.token("body", function (req, res) {
 	return JSON.stringify(req.body);
@@ -55,13 +55,16 @@ app.use(
 	)
 );
 
-// app.get("/info", (req, res) => {
-// 	const totalPersons = persons.length;
-// 	const currentDateTime = new Date().toUTCString();
-// 	const htmlTemp = `<p>Phonebook has info for ${totalPersons} people</p><p>${currentDateTime}</p>`;
-
-// 	return res.send(htmlTemp);
-// });
+app.get("/info", (req, res, next) => {
+	Person.countDocuments({})
+		.then((result) => {
+			const totalDoc = result;
+			const currentDateTime = new Date().toUTCString();
+			const htmlTemp = `<p>Phonebook has info for ${totalDoc} people</p><p>${currentDateTime}</p>`;
+			return res.send(htmlTemp);
+		})
+		.catch((error) => next(error));
+});
 
 app.get("/api/persons", (req, res, next) => {
 	Person.find({})
