@@ -10,22 +10,22 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // let persons = [
-	// 	{
+// 	{
 // 		name: "Arto Hellas",
 // 		number: "040-123456",
 // 		id: "1",
 // 	},
-	// 	{
+// 	{
 // 		name: "Ada Lovelace",
 // 		number: "39-44-5323523",
 // 		id: "2",
 // 	},
-	// 	{
+// 	{
 // 		name: "Dan Abramov",
 // 		number: "12-43-234345",
 // 		id: "3",
 // 	},
-	// 	{
+// 	{
 // 		name: "Mary Poppendieck",
 // 		number: "39-23-6423122",
 // 		id: "4",
@@ -78,7 +78,7 @@ app.get("/api/persons/:id", (req, res) => {
 
 	Person.findById(id)
 		.then((person) => {
-	return res.json(person);
+			return res.json(person);
 		})
 		.catch((error) => res.json(error).status(500));
 });
@@ -99,21 +99,25 @@ app.post("/api/persons", (req, res) => {
 			.json({ message: "Name and Number must be filled" });
 	}
 
-	const isNameDuplicated = persons.find((c) => c.name === name);
+	// const isNameDuplicated = persons.find((c) => c.name === name);
 
-	if (isNameDuplicated) {
-		return res.status(409).json({ error: "name must be unique" });
-	}
+	// if (isNameDuplicated) {
+	// 	return res.status(409).json({ error: "name must be unique" });
+	// }
 
-	const newPersonObj = {
+	const newPerson = new Person({
 		name,
 		number,
-		id: generateId(),
-	};
+	});
 
-	persons = persons.concat(newPersonObj);
-
-	res.status(201).json(persons);
+	newPerson
+		.save()
+		.then((savedPerson) => {
+			return res.json(savedPerson);
+		})
+		.catch((error) => {
+			return res.status(500).json({ error });
+		});
 });
 
 app.listen(PORT, () => {
