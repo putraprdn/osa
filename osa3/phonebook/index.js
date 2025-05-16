@@ -3,44 +3,47 @@ const morgan = require("morgan");
 const cors = require("cors");
 const path = require("path");
 
+require("dotenv").config();
+
+const Person = require("./model/person");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-let persons = [
-	{
-		name: "Arto Hellas",
-		number: "040-123456",
-		id: "1",
-	},
-	{
-		name: "Ada Lovelace",
-		number: "39-44-5323523",
-		id: "2",
-	},
-	{
-		name: "Dan Abramov",
-		number: "12-43-234345",
-		id: "3",
-	},
-	{
-		name: "Mary Poppendieck",
-		number: "39-23-6423122",
-		id: "4",
-	},
-];
+// let persons = [
+	// 	{
+// 		name: "Arto Hellas",
+// 		number: "040-123456",
+// 		id: "1",
+// 	},
+	// 	{
+// 		name: "Ada Lovelace",
+// 		number: "39-44-5323523",
+// 		id: "2",
+// 	},
+	// 	{
+// 		name: "Dan Abramov",
+// 		number: "12-43-234345",
+// 		id: "3",
+// 	},
+	// 	{
+// 		name: "Mary Poppendieck",
+// 		number: "39-23-6423122",
+// 		id: "4",
+// 	},
+// ];
 
-const generateId = () => {
-	const randId = Math.floor(100000 + Math.random() * 900000);
-	return randId.toString();
-};
+// const generateId = () => {
+// 	const randId = Math.floor(100000 + Math.random() * 900000);
+// 	return randId.toString();
+// };
 
 app.use(express.json());
 app.use(cors());
-app.use(express.static(path.join(__dirname, 'dist')))
+app.use(express.static(path.join(__dirname, "dist")));
 
 app.get(/^(?!\/api).*/, (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'))
-})
+	res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
 
 morgan.token("body", function (req, res) {
 	return JSON.stringify(req.body);
@@ -52,25 +55,32 @@ app.use(
 	)
 );
 
-app.get("/info", (req, res) => {
-	const totalPersons = persons.length;
-	const currentDateTime = new Date().toUTCString();
-	const htmlTemp = `<p>Phonebook has info for ${totalPersons} people</p><p>${currentDateTime}</p>`;
+// app.get("/info", (req, res) => {
+// 	const totalPersons = persons.length;
+// 	const currentDateTime = new Date().toUTCString();
+// 	const htmlTemp = `<p>Phonebook has info for ${totalPersons} people</p><p>${currentDateTime}</p>`;
 
-	return res.send(htmlTemp);
-});
+// 	return res.send(htmlTemp);
+// });
 
 app.get("/api/persons", (req, res) => {
-	return res.json(persons);
+	Person.find({})
+		.then((result) => {
+			return res.json(result);
+		})
+		.catch((error) => {
+			return res.status(500).json({ error: "Failed to fetch data" });
+		});
 });
 
 app.get("/api/persons/:id", (req, res) => {
 	const { id } = req.params;
-	const person = persons.find((c) => c.id === id);
 
-	if (!person) return res.status(404).end();
-
+	Person.findById(id)
+		.then((person) => {
 	return res.json(person);
+		})
+		.catch((error) => res.json(error).status(500));
 });
 
 app.delete("/api/persons/:id", (req, res) => {

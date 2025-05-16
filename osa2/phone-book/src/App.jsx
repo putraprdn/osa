@@ -19,7 +19,7 @@ const App = () => {
 	const [notification, setNotification] = useState({ type: "", msg: "" });
 
 	useEffect(() => {
-		const data = getAllPhoneBooks().then((response) => {
+		getAllPhoneBooks().then((response) => {
 			setPersons(response.data);
 			console.log(response.data);
 		});

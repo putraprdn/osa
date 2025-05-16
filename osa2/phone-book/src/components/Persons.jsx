@@ -2,7 +2,7 @@ const Persons = ({ persons, handleDelete }) => {
 	return (
 		<>
 			{persons.map(({ name, id, number }) => (
-				<div key={name}>
+				<div key={id}>
 					{name} {number}{" "}
 					<button
 						onClick={() => {
