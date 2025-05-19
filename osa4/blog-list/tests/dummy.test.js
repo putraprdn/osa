@@ -96,3 +96,58 @@ describe("favorite blog", () => {
 		assert.deepStrictEqual(listHelper.favoriteBlog(blogs), result);
 	});
 });
+
+describe("most blogs", () => {
+	const blogs = [
+		{
+			title: "Tes Blog",
+			author: "dudung",
+			url: "https://ehhehee.cpm",
+			likes: 2,
+			id: "682ab8397263fdebb6241254",
+		},
+		{
+			title: "Tes Blog 2",
+			author: "dudung",
+			url: "https://ehhehee.cpm",
+			likes: 2,
+			id: "682aba8ed50a968c1fbc9706",
+		},
+		{
+			title: "Another Blog",
+			author: "robert",
+			url: "https://example.com",
+			likes: 5,
+			id: "782aba8ed50a968c1fbc9707",
+		},
+		{
+			title: "Third Blog",
+			author: "robert",
+			url: "https://example.com",
+			likes: 3,
+			id: "882aba8ed50a968c1fbc9708",
+		},
+	];
+
+	test("of empty list should return null", () => {
+		const emptyBlogs = [];
+
+		assert.deepStrictEqual(listHelper.mostBlogs(emptyBlogs), null);
+	});
+
+	test("of a single blog list should return that author", () => {
+		const singleBlogList = [blogs[0]];
+
+		assert.deepStrictEqual(listHelper.mostBlogs(singleBlogList), {
+			author: "dudung",
+			blogs: 1,
+		});
+	});
+
+	test("of a blog list with multiple authors", () => {
+		assert.deepStrictEqual(listHelper.mostBlogs(blogs), {
+			author: "dudung",
+			blogs: 2,
+		});
+	});
+});
