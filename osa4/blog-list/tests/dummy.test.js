@@ -52,3 +52,47 @@ describe("total likes", () => {
 		assert.strictEqual(likes, 4);
 	});
 });
+
+describe("favorite blog", () => {
+	const blogs = [
+		{
+			title: "Tes Blog",
+			author: "dudung",
+			url: "https://ehhehee.cpm",
+			likes: 2,
+			id: "682ab8397263fdebb6241254",
+		},
+		{
+			title: "Tes Blog 2",
+			author: "dudung",
+			url: "https://ehhehee.cpm",
+			likes: 5,
+			id: "682aba8ed50a968c1fbc9706",
+		},
+		{
+			title: "Tes Blog 2",
+			author: "dudung",
+			url: "https://ehhehee.cpm",
+			likes: 58,
+			id: "682aba8ed50a968c1fbc9706",
+		},
+	];
+
+	test("of empty list should return null", () => {
+		const emptyBlogs = [];
+
+		assert.deepStrictEqual(listHelper.favoriteBlog(emptyBlogs), null);
+	});
+
+	test("of a single blog list should return the only data", () => {
+		const singleBlog = [blogs[1]];
+
+		assert.deepStrictEqual(listHelper.favoriteBlog(singleBlog), blogs[1]);
+	});
+
+	test("of a blog lists is calculated right", () => {
+		const result = blogs[2];
+
+		assert.deepStrictEqual(listHelper.favoriteBlog(blogs), result);
+	});
+});
