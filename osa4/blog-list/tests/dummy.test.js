@@ -151,3 +151,61 @@ describe("most blogs", () => {
 		});
 	});
 });
+
+describe("author with most likes", () => {
+	const blogs = [
+		{
+			title: "Tes Blog",
+			author: "dudung",
+			url: "https://ehhehee.cpm",
+			likes: 2,
+			id: "682ab8397263fdebb6241254",
+		},
+		{
+			title: "Tes Blog 2",
+			author: "dudung",
+			url: "https://ehhehee.cpm",
+			likes: 2,
+			id: "682aba8ed50a968c1fbc9706",
+		},
+		{
+			title: "Another Blog",
+			author: "robert",
+			url: "https://example.com",
+			likes: 5,
+			id: "782aba8ed50a968c1fbc9707",
+		},
+		{
+			title: "Third Blog",
+			author: "robert",
+			url: "https://example.com",
+			likes: 3,
+			id: "882aba8ed50a968c1fbc9708",
+		},
+	];
+
+	test("of empty list should return null", () => {
+		const emptyBlogs = [];
+
+		assert.deepStrictEqual(
+			listHelper.authorWithMostLikes(emptyBlogs),
+			null
+		);
+	});
+
+	test("of a single blog list should return that author", () => {
+		const singleBlogList = [blogs[0]];
+
+		assert.deepStrictEqual(listHelper.authorWithMostLikes(singleBlogList), {
+			author: "dudung",
+			likes: 2,
+		});
+	});
+
+	test("of a blog list with multiple authors", () => {
+		assert.deepStrictEqual(listHelper.authorWithMostLikes(blogs), {
+			author: "robert",
+			likes: 8,
+		});
+	});
+});
