@@ -8,12 +8,12 @@ const Blog = require("../models/blog");
 
 const api = supertest(app);
 
-beforeEach(async () => {
-	await Blog.deleteMany({});
-	await Blog.insertMany(helper.initialBlogs);
-});
-
 describe("blog api", () => {
+	beforeEach(async () => {
+		await Blog.deleteMany({});
+		await Blog.insertMany(helper.initialBlogs);
+	});
+
 	test("is returned as json", async () => {
 		await api
 			.get("/api/blogs")
@@ -41,82 +41,98 @@ describe("blog api", () => {
 		});
 	});
 
-	test("should return the created blog and increment the document's length", async () => {
-		const initialBlogsCount = (await helper.blogsInDb()).length;
+	describe("addition of a new blog", () => {
+		test("should return the created blog and increment the document's length", async () => {
+			const initialBlogsCount = (await helper.blogsInDb()).length;
 
-		const newBlog = {
-			title: "Create from test",
-			author: "Test Author",
-			url: "http://google.com",
-			likes: 2,
-		};
+			const newBlog = {
+				title: "Create from test",
+				author: "Test Author",
+				url: "http://google.com",
+				likes: 2,
+			};
 
-		await api
-			.post("/api/blogs")
-			.send(newBlog)
-			.expect(201)
-			.expect("Content-Type", /application\/json/);
+			await api
+				.post("/api/blogs")
+				.send(newBlog)
+				.expect(201)
+				.expect("Content-Type", /application\/json/);
 
-		const response = await api.get("/api/blogs");
+			const response = await api.get("/api/blogs");
 
-		const titles = response.body.map((r) => r.title);
+			const titles = response.body.map((r) => r.title);
 
-		assert.strictEqual(response.body.length, initialBlogsCount + 1);
+			assert.strictEqual(response.body.length, initialBlogsCount + 1);
 
-		assert(titles.includes("Create from test"));
+			assert(titles.includes("Create from test"));
+		});
+
+		test("should have default value for 'likes' when create new blog", async () => {
+			const newBlog = {
+				title: "Create without likes",
+				author: "My Author",
+				url: "http://google.com",
+			};
+
+			await api
+				.post("/api/blogs")
+				.send(newBlog)
+				.expect(201)
+				.expect("Content-Type", /application\/json/);
+
+			const response = await api.get("/api/blogs");
+
+			const createdBlog = response.body.find(
+				(blog) => blog.title === newBlog.title
+			);
+
+			assert.strictEqual(createdBlog.title, newBlog.title);
+			assert.ok(
+				Object.hasOwn(createdBlog, "likes"),
+				"Blog should have 'likes' key"
+			);
+			assert.strictEqual(
+				createdBlog.likes,
+				0,
+				"Likes should default to 0"
+			);
+		});
+
+		test("should return status 400 is title of url is empty", async () => {
+			const newBlogWithoutURL = {
+				title: "Create without url",
+				author: "My Author",
+				// url: "http://google.com",
+			};
+
+			await api
+				.post("/api/blogs")
+				.send(newBlogWithoutURL)
+				.expect(400)
+				.expect("Content-Type", /application\/json/);
+
+			const newBlogWithoutTitle = {
+				// title: "Create without title",
+				author: "My Author",
+				url: "http://google.com",
+			};
+
+			await api
+				.post("/api/blogs")
+				.send(newBlogWithoutTitle)
+				.expect(400)
+				.expect("Content-Type", /application\/json/);
+		});
 	});
 
-	test("should have default value for 'likes' when create new blog", async () => {
-		const newBlog = {
-			title: "Create without likes",
-			author: "My Author",
-			url: "http://google.com",
-		};
+	describe("deletion of an existing blog", () => {
+		test("should return status code 204 if valid", async () => {
+			const { id } = await Blog.where({
+				title: "Tes Blog",
+			}).findOne();
 
-		await api
-			.post("/api/blogs")
-			.send(newBlog)
-			.expect(201)
-			.expect("Content-Type", /application\/json/);
-
-		const response = await api.get("/api/blogs");
-
-		const createdBlog = response.body.find(
-			(blog) => blog.title === newBlog.title
-		);
-
-		assert.strictEqual(createdBlog.title, newBlog.title);
-		assert.ok(
-			Object.hasOwn(createdBlog, "likes"),
-			"Blog should have 'likes' key"
-		);
-		assert.strictEqual(createdBlog.likes, 0, "Likes should default to 0");
-	});
-
-	test("should return status 400 is title of url is empty", async () => {
-		const newBlogWithoutURL = {
-			title: "Create without url",
-			author: "My Author",
-			// url: "http://google.com",
-		};
-
-		await api
-			.post("/api/blogs")
-			.send(newBlogWithoutURL)
-			.expect(400)
-			.expect("Content-Type", /application\/json/);
-
-		const newBlogWithoutTitle = {
-			// title: "Create without title",
-			author: "My Author",
-			url: "http://google.com",
-		};
-
-		await api
-			.post("/api/blogs")
-			.send(newBlogWithoutTitle)
-			.expect(400)
-			.expect("Content-Type", /application\/json/);
+			await api.delete(`/api/blogs/${id}`).expect(204);
+		});
 	});
 });
 
