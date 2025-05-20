@@ -6,21 +6,18 @@ const initialBlogs = [
 		author: "dudung",
 		url: "https://ehhehee.cpm",
 		likes: 2,
-		id: "682ab8397263fdebb6241254",
 	},
 	{
 		title: "Tes Blog 2",
 		author: "dudung",
 		url: "https://ehhehee.cpm",
 		likes: 5,
-		id: "682aba8ed50a968c1fbc9706",
 	},
 	{
-		title: "Tes Blog 2",
+		title: "Tes Blog 3",
 		author: "dudung",
 		url: "https://ehhehee.cpm",
 		likes: 58,
-		id: "682aba8ed50a968c1fbc9706",
 	},
 ];
 
