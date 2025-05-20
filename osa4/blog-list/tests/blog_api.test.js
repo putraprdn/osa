@@ -134,6 +134,78 @@ describe("blog api", () => {
 			await api.delete(`/api/blogs/${id}`).expect(204);
 		});
 	});
+
+	describe("update an existing data", () => {
+		test("should return status code 200 if valid and contains the updated field", async () => {
+			const blogsAtStart = await Blog.find({});
+			const blogToUpdate = blogsAtStart[0];
+
+			const updateFields = { likes: 10 };
+
+			const response = await api
+				.put(`/api/blogs/${blogToUpdate.id}`)
+				.send(updateFields)
+				.expect(200)
+				.expect("Content-Type", /application\/json/);
+
+			const updatedBlog = response.body;
+
+			assert.strictEqual(updatedBlog.likes, updateFields.likes);
+
+			assert.strictEqual(updatedBlog.title, blogToUpdate.title);
+			assert.strictEqual(updatedBlog.author, blogToUpdate.author);
+			assert.strictEqual(updatedBlog.url, blogToUpdate.url);
+		});
+
+		test("should update multiple fields of an existing blog", async () => {
+			const blogsAtStart = await Blog.find({});
+			const blogToUpdate = blogsAtStart[0];
+
+			const updateFields = {
+				title: "Updated Blog Title",
+				author: "New Author",
+				likes: 15,
+			};
+
+			const response = await api
+				.put(`/api/blogs/${blogToUpdate.id}`)
+				.send(updateFields)
+				.expect(200)
+				.expect("Content-Type", /application\/json/);
+
+			const updatedBlog = response.body;
+
+			// Check that updated fields are correct
+			assert.strictEqual(updatedBlog.title, updateFields.title);
+			assert.strictEqual(updatedBlog.author, updateFields.author);
+			assert.strictEqual(updatedBlog.likes, updateFields.likes);
+
+			// Check that unchanged fields remain the same
+			assert.strictEqual(updatedBlog.url, blogToUpdate.url);
+
+			// Verify the update in the database
+			const blogInDb = await Blog.findById(blogToUpdate.id);
+			assert.strictEqual(blogInDb.title, updateFields.title);
+			assert.strictEqual(blogInDb.author, updateFields.author);
+			assert.strictEqual(blogInDb.likes, updateFields.likes);
+			assert.strictEqual(blogInDb.url, blogToUpdate.url);
+		});
+
+		test("should return 404 when updating a non-existent blog", async () => {
+			const nonExistentId = new mongoose.Types.ObjectId();
+
+			const updateFields = {
+				title: "Attempt to Update Non-Existent Blog",
+				likes: 5,
+			};
+
+			await api
+				.put(`/api/blogs/${nonExistentId}`)
+				.send(updateFields)
+				.expect(404)
+				.expect("Content-Type", /application\/json/);
+		});
+	});
 });
 
 after(async () => {
