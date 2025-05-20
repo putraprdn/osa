@@ -65,6 +65,33 @@ describe("blog api", () => {
 
 		assert(titles.includes("Create from test"));
 	});
+
+	test("should have default value for 'likes' when create new blog", async () => {
+		const newBlog = {
+			title: "Create without likes",
+			author: "My Author",
+			url: "http://google.com",
+		};
+
+		await api
+			.post("/api/blogs")
+			.send(newBlog)
+			.expect(201)
+			.expect("Content-Type", /application\/json/);
+
+		const response = await api.get("/api/blogs");
+
+		const createdBlog = response.body.find(
+			(blog) => blog.title === newBlog.title
+		);
+
+		assert.strictEqual(createdBlog.title, newBlog.title);
+		assert.ok(
+			Object.hasOwn(createdBlog, "likes"),
+			"Blog should have 'likes' key"
+		);
+		assert.strictEqual(createdBlog.likes, 0, "Likes should default to 0");
+	});
 });
 
 after(async () => {
