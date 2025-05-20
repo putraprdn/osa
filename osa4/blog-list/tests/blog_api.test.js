@@ -40,6 +40,30 @@ describe("blog api", () => {
 			);
 		});
 	});
+
+	test("should return the created blog and increment the document's length", async () => {
+		const initialBlogsCount = (await helper.blogsInDb()).length;
+
+		const newBlog = {
+			title: "Create from test",
+			author: "Test Author",
+			url: "http://google.com",
+			likes: 2,
+		};
+
+		await api
+			.post("/api/blogs")
+			.send(newBlog)
+			.expect(201)
+			.expect("Content-Type", /application\/json/);
+
+		const response = await api.get("/api/blogs");
+
+		const titles = response.body.map((r) => r.title);
+
+		assert.strictEqual(response.body.length, initialBlogsCount + 1);
+
+		assert(titles.includes("Create from test"));
 	});
 });
 
