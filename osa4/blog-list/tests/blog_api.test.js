@@ -92,6 +92,32 @@ describe("blog api", () => {
 		);
 		assert.strictEqual(createdBlog.likes, 0, "Likes should default to 0");
 	});
+
+	test("should return status 400 is title of url is empty", async () => {
+		const newBlogWithoutURL = {
+			title: "Create without url",
+			author: "My Author",
+			// url: "http://google.com",
+		};
+
+		await api
+			.post("/api/blogs")
+			.send(newBlogWithoutURL)
+			.expect(400)
+			.expect("Content-Type", /application\/json/);
+
+		const newBlogWithoutTitle = {
+			// title: "Create without title",
+			author: "My Author",
+			url: "http://google.com",
+		};
+
+		await api
+			.post("/api/blogs")
+			.send(newBlogWithoutTitle)
+			.expect(400)
+			.expect("Content-Type", /application\/json/);
+	});
 });
 
 after(async () => {
