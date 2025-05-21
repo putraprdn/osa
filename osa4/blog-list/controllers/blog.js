@@ -4,45 +4,34 @@ const Blog = require("../models/blog");
 const User = require("../models/user");
 const logger = require("../utils/logger");
 
-const getTokenFrom = (request) => {
-	const authorization = request.get("authorization");
-	if (authorization && authorization.startsWith("Bearer ")) {
-		return authorization.replace("Bearer ", "");
-	}
-	return null;
-};
-
-blogRouter.get("/", async (_, response) => {
+blogRouter.get("/", async (_, res) => {
 	const blogs = await Blog.find({}).populate("user", {
 		name: 1,
 		username: 1,
 	});
-	response.json(blogs);
+	res.json(blogs);
 });
 
-blogRouter.post("/", async (request, response) => {
-	const body = request.body;
+blogRouter.post("/", async (req, res) => {
+	const body = req.body;
 
 	if (!body?.title || !body?.url) {
 		const msg = "title or url is can't be empty";
 		logger.error(msg);
-		return response.status(400).json({ error: msg });
+		return res.status(400).json({ error: msg });
 	}
 
-	const decodedToken = jwt.verify(
-		getTokenFrom(request),
-		process.env.SECRET_KEY
-	);
+	const decodedToken = jwt.verify(req.token, process.env.SECRET_KEY);
 
 	if (!decodedToken.id) {
-		return response.status(401).json({ error: "token is invalid" });
+		return res.status(401).json({ error: "token is invalid" });
 	}
 
 	const userData = await User.findById(decodedToken.id);
 	body["user"] = userData._id;
 
 	body["likes"] = body?.likes ? body.likes : 0;
-	const blog = new Blog(request.body);
+	const blog = new Blog(req.body);
 
 	// Save newly created blog with user data
 	const savedBlog = await blog.save();
@@ -51,14 +40,14 @@ blogRouter.post("/", async (request, response) => {
 	userData.blogs = userData.blogs.concat(savedBlog._id);
 	await userData.save();
 
-	response.status(201).json(savedBlog);
+	res.status(201).json(savedBlog);
 });
 
-blogRouter.put("/:id", async (request, response) => {
-	const id = request.params.id;
-	const body = request.body;
+blogRouter.put("/:id", async (req, res) => {
+	const id = req.params.id;
+	const body = req.body;
 
-	// Only include fields that are present in the request body
+	// Only include fields that are present in the req body
 	const updateFields = {};
 	if (body.title) updateFields.title = body.title;
 	if (body.author) updateFields.author = body.author;
@@ -69,19 +58,18 @@ blogRouter.put("/:id", async (request, response) => {
 		new: true,
 	});
 
-	if (!updatedBlog)
-		return response.status(404).json({ error: "Blog not found" });
+	if (!updatedBlog) return res.status(404).json({ error: "Blog not found" });
 
-	response.json(updatedBlog);
+	res.json(updatedBlog);
 });
 
-blogRouter.delete("/:id", async (request, response) => {
-	const id = request.params.id;
+blogRouter.delete("/:id", async (req, res) => {
+	const id = req.params.id;
 
 	const deletedBlog = await Blog.findByIdAndDelete(id);
-	if (!deletedBlog) response.status(404).json({ error: "blog not found" });
+	if (!deletedBlog) res.status(404).json({ error: "blog not found" });
 
-	return response.status(204).end();
+	return res.status(204).end();
 });
 
 module.exports = blogRouter;
