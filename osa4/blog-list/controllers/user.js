@@ -11,10 +11,21 @@ userRouter.get("/", async (_, res) => {
 userRouter.post("/", async (req, res) => {
 	const { username, name, password } = req.body;
 
+	if (password.length < 3) {
+		logger.error(password, "password is too short");
+		return res
+			.status(400)
+			.json({ error: "password is minimum 3 characters long" });
+	}
+
 	const hashedPassword = await bcrypt.hash(password, 10);
 	logger.info(hashedPassword);
 
-	const result = await User.create({ username, name, password: hashedPassword });
+	const result = await User.create({
+		username,
+		name,
+		password: hashedPassword,
+	});
 	res.status(201).json(result);
 });
 
