@@ -17,6 +17,14 @@ const App = () => {
 		fetchBlogs();
 	}, []);
 
+	useEffect(() => {
+		const loggedUserJSON = window.localStorage.getItem("loggedUser");
+		if (loggedUserJSON) {
+			const user = JSON.parse(loggedUserJSON);
+			setUser(user);
+		}
+	}, []);
+
 	const handleLogin = async (e) => {
 		e.preventDefault();
 		try {
@@ -28,12 +36,18 @@ const App = () => {
 			if (!response.token) throw new Error("wrong username or password");
 
 			setUser(response);
+			window.localStorage.setItem("loggedUser", JSON.stringify(response));
 		} catch (error) {
 			console.error(error);
 		} finally {
 			setUsername("");
 			setPassword("");
 		}
+	};
+
+	const handleLogout = () => {
+		window.localStorage.removeItem("loggedUser");
+		setUser({});
 	};
 
 	if (!user.token) {
@@ -76,7 +90,11 @@ const App = () => {
 	return (
 		<div>
 			<h2>blogs</h2>
-			<p>{user.name} logged in</p>
+			<p>
+				{user.name} logged in{" "}
+				<button onClick={handleLogout}>logout</button>
+			</p>
+
 			{blogs.map((blog) => (
 				<Blog
 					key={blog.id}
