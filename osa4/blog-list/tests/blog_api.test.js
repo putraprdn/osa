@@ -5,13 +5,33 @@ const app = require("../app");
 const assert = require("node:assert");
 const helper = require("./test_helper");
 const Blog = require("../models/blog");
+const User = require("../models/user");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const api = supertest(app);
 
 describe("blog api", () => {
+	let token;
+	let user;
+
 	beforeEach(async () => {
 		await Blog.deleteMany({});
 		await Blog.insertMany(helper.initialBlogs);
+
+		// Clear users and create a test user
+		await User.deleteMany({});
+
+		// Create a user for authentication
+		user = new User({
+			username: "testuser",
+			name: "Test User",
+			password: await bcrypt.hash("testpassword", 10),
+		});
+		await user.save();
+
+		// Generate token for the test user
+		token = helper.generateToken(user);
 	});
 
 	test("is returned as json", async () => {
@@ -54,16 +74,15 @@ describe("blog api", () => {
 
 			await api
 				.post("/api/blogs")
+				.set("Authorization", `Bearer ${token}`)
 				.send(newBlog)
 				.expect(201)
 				.expect("Content-Type", /application\/json/);
 
 			const response = await api.get("/api/blogs");
-
 			const titles = response.body.map((r) => r.title);
 
 			assert.strictEqual(response.body.length, initialBlogsCount + 1);
-
 			assert(titles.includes("Create from test"));
 		});
 
@@ -76,6 +95,7 @@ describe("blog api", () => {
 
 			await api
 				.post("/api/blogs")
+				.set("Authorization", `Bearer ${token}`)
 				.send(newBlog)
 				.expect(201)
 				.expect("Content-Type", /application\/json/);
@@ -123,15 +143,82 @@ describe("blog api", () => {
 				.expect(400)
 				.expect("Content-Type", /application\/json/);
 		});
+
+		test("should fail to create blog without valid token", async () => {
+			const newBlog = {
+				title: "Unauthorized Blog",
+				author: "Test Author",
+				url: "http://unauthorized.com",
+				likes: 0,
+			};
+
+			await api.post("/api/blogs").send(newBlog).expect(401);
+		});
 	});
 
 	describe("deletion of an existing blog", () => {
-		test("should return status code 204 if valid", async () => {
-			const { id } = await Blog.where({
-				title: "Tes Blog",
-			}).findOne();
+		test("should return status code 204 when deleting own blog", async () => {
+			const newBlog = {
+				title: "Blog to Delete",
+				author: "Test Author",
+				url: "http://delete-test.com",
+				likes: 0
+			};
 
-			await api.delete(`/api/blogs/${id}`).expect(204);
+			const createResponse = await api
+				.post("/api/blogs")
+				.set("Authorization", `Bearer ${token}`)
+				.send(newBlog)
+				.expect(201);
+
+			const createdBlog = createResponse.body;
+
+			await api
+				.delete(`/api/blogs/${createdBlog.id}`)
+				.set("Authorization", `Bearer ${token}`)
+				.expect(204);
+
+			const blogsAfterDeletion = await helper.blogsInDb();
+			const deletedBlog = blogsAfterDeletion.find(b => b.id === createdBlog.id);
+			assert.strictEqual(deletedBlog, undefined);
+		});
+
+		test("should return 401 when trying to delete another user's blog", async () => {
+			const anotherUser = new User({
+				username: "anotheruser",
+				name: "Another Test User",
+				password: await bcrypt.hash("anotherpassword", 10)
+			});
+			await anotherUser.save();
+
+			const newBlog = {
+				title: "Another User's Blog",
+				author: "Another Author",
+				url: "http://another-user-blog.com",
+				likes: 5
+			};
+
+			const createResponse = await api
+				.post("/api/blogs")
+				.set("Authorization", `Bearer ${helper.generateToken(anotherUser)}`)
+				.send(newBlog)
+				.expect(201);
+
+			const createdBlog = createResponse.body;
+
+			await api
+				.delete(`/api/blogs/${createdBlog.id}`)
+				.set("Authorization", `Bearer ${token}`)
+				.expect(401);
+		});
+
+		test("should return 401 when no token is provided", async () => {
+			const blogsAtStart = await helper.blogsInDb();
+			const blogToDelete = blogsAtStart[0];
+
+			await api
+				.delete(`/api/blogs/${blogToDelete.id}`)
+				.expect(401);
 		});
 	});
 
