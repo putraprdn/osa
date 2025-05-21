@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
+import Notification from "./components/Notification";
 
 const App = () => {
 	const [blogs, setBlogs] = useState([]);
@@ -12,6 +13,10 @@ const App = () => {
 		title: "",
 		author: "",
 		url: "",
+	});
+	const [notification, setNotification] = useState({
+		type: "",
+		msg: "",
 	});
 
 	useEffect(() => {
@@ -24,7 +29,7 @@ const App = () => {
 
 	useEffect(() => {
 		const loggedUserJSON = window.localStorage.getItem("loggedUser");
-		if (loggedUserJSON) {
+		if (loggedUserJSON && loggedUserJSON !== "undefined") {
 			const user = JSON.parse(loggedUserJSON);
 			setUser(user);
 		}
@@ -38,13 +43,15 @@ const App = () => {
 				password,
 			});
 
-			if (!response.token) throw new Error("wrong username or password");
-
 			blogService.setToken(response.token);
 			setUser(response);
-			window.localStorage.setItem("loggedUser", JSON.stringify(response));
+			window.localStorage.setItem(
+				"loggedUser",
+				JSON.stringify(response.data)
+			);
 		} catch (error) {
-			console.error(error);
+			console.error(error.response);
+			handleShowNotification("error", error.response.data.error);
 		} finally {
 			setUsername("");
 			setPassword("");
@@ -56,10 +63,50 @@ const App = () => {
 		setUser({});
 	};
 
+	const handleBlogDataChange = (e) => {
+		console.log(e.target.name, e.target.value);
+		setBlogData({ ...blogData, [e.target.name]: e.target.value });
+	};
+
+	const handleCreateBlog = async (e) => {
+		e.preventDefault();
+		try {
+			const newBlog = await blogService.createBlog(blogData);
+			setBlogs(blogs.concat(newBlog));
+			handleShowNotification(
+				"success",
+				`a new blog ${newBlog.title} by ${newBlog.author} added`
+			);
+		} catch (error) {
+			console.error(error.response);
+			handleShowNotification("error", error.response.data.error);
+		} finally {
+			setBlogData({
+				title: "",
+				author: "",
+				url: "",
+			});
+		}
+	};
+
+	const handleShowNotification = (type, msg) => {
+		console.log(type, msg);
+		setNotification({ type, msg });
+		setTimeout(() => {
+			setNotification({ type: "", msg: "" });
+		}, 5000);
+	};
+
 	if (!user.token) {
 		return (
 			<>
 				<h2>log in to application</h2>
+
+				<Notification
+					type={notification.type}
+					msg={notification.msg}
+				/>
+
 				<form onSubmit={handleLogin}>
 					<div>
 						username{" "}
@@ -89,31 +136,15 @@ const App = () => {
 		);
 	}
 
-	const handleBlogDataChange = (e) => {
-		console.log(e.target.name, e.target.value);
-		setBlogData({ ...blogData, [e.target.name]: e.target.value });
-	};
-
-	const handleCreateBlog = async (e) => {
-		e.preventDefault();
-		try {
-			console.log(blogData);
-			const newBlog = await blogService.createBlog(blogData);
-			setBlogs(blogs.concat(newBlog));
-		} catch (error) {
-			console.error(error);
-		} finally {
-			setBlogData({
-				title: "",
-				author: "",
-				url: "",
-			});
-		}
-	};
-
 	return (
 		<div>
 			<h2>blogs</h2>
+
+			<Notification
+				type={notification.type}
+				msg={notification.msg}
+			/>
+
 			<p>
 				{user.name} logged in{" "}
 				<button onClick={handleLogout}>logout</button>
