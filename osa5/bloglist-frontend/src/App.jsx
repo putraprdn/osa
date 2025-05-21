@@ -8,6 +8,11 @@ const App = () => {
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [user, setUser] = useState({});
+	const [blogData, setBlogData] = useState({
+		title: "",
+		author: "",
+		url: "",
+	});
 
 	useEffect(() => {
 		const fetchBlogs = async () => {
@@ -35,6 +40,7 @@ const App = () => {
 
 			if (!response.token) throw new Error("wrong username or password");
 
+			blogService.setToken(response.token);
 			setUser(response);
 			window.localStorage.setItem("loggedUser", JSON.stringify(response));
 		} catch (error) {
@@ -83,8 +89,26 @@ const App = () => {
 		);
 	}
 
-	const blogForm = () => {
-		return <></>;
+	const handleBlogDataChange = (e) => {
+		console.log(e.target.name, e.target.value);
+		setBlogData({ ...blogData, [e.target.name]: e.target.value });
+	};
+
+	const handleCreateBlog = async (e) => {
+		e.preventDefault();
+		try {
+			console.log(blogData);
+			const newBlog = await blogService.createBlog(blogData);
+			setBlogs(blogs.concat(newBlog));
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setBlogData({
+				title: "",
+				author: "",
+				url: "",
+			});
+		}
 	};
 
 	return (
@@ -94,6 +118,38 @@ const App = () => {
 				{user.name} logged in{" "}
 				<button onClick={handleLogout}>logout</button>
 			</p>
+
+			<h3>create new</h3>
+			<form onSubmit={handleCreateBlog}>
+				<div>
+					title:
+					<input
+						value={blogData.title}
+						onChange={handleBlogDataChange}
+						type="text"
+						name="title"
+					/>
+				</div>
+				<div>
+					author:
+					<input
+						value={blogData.author}
+						onChange={handleBlogDataChange}
+						type="text"
+						name="author"
+					/>
+				</div>
+				<div>
+					url:
+					<input
+						value={blogData.url}
+						onChange={handleBlogDataChange}
+						type="text"
+						name="url"
+					/>
+				</div>
+				<button type="submit">create</button>
+			</form>
 
 			{blogs.map((blog) => (
 				<Blog
