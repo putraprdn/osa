@@ -21,14 +21,11 @@ blogRouter.post("/", async (req, res) => {
 		return res.status(400).json({ error: msg });
 	}
 
-	const decodedToken = jwt.verify(req.token, process.env.SECRET_KEY);
+	const userDataFromToken = req.user;
+	if (!(userDataFromToken && userDataFromToken.id))
+		return res.status(401).json({ error: "invalid token" });
 
-	if (!decodedToken.id) {
-		return res.status(401).json({ error: "token is invalid" });
-	}
-
-	const userData = await User.findById(decodedToken.id);
-	body["user"] = userData._id;
+	body["user"] = userDataFromToken.id;
 
 	body["likes"] = body?.likes ? body.likes : 0;
 	const blog = new Blog(req.body);
@@ -37,8 +34,9 @@ blogRouter.post("/", async (req, res) => {
 	const savedBlog = await blog.save();
 
 	// Add saved blog to the user data
-	userData.blogs = userData.blogs.concat(savedBlog._id);
-	await userData.save();
+	const updatedUserBlog = await User.findById(userDataFromToken.id);
+	updatedUserBlog.blogs = updatedUserBlog.blogs.concat(savedBlog._id);
+	await updatedUserBlog.save();
 
 	res.status(201).json(savedBlog);
 });
@@ -65,14 +63,15 @@ blogRouter.put("/:id", async (req, res) => {
 
 blogRouter.delete("/:id", async (req, res) => {
 	const id = req.params.id;
-	const token = jwt.verify(req.token, process.env.SECRET_KEY);
-	if (!(token && token.id))
+
+	const userDataFromToken = req.user;
+	if (!(userDataFromToken && userDataFromToken.id))
 		return res.status(401).json({ error: "invalid token" });
 
 	const blogToDelete = await Blog.findById(id);
 	if (!blogToDelete) return res.status(404).json({ error: "blog not found" });
 
-	if (blogToDelete.user.toString() !== token.id)
+	if (blogToDelete.user.toString() !== userDataFromToken.id)
 		return res.status(401).json({ error: "unauthorized access" });
 
 	await Blog.findByIdAndDelete(blogToDelete._id);
