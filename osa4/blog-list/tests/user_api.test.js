@@ -29,7 +29,7 @@ describe("user api", () => {
 			.expect("Content-Type", /application\/json/);
 
 		const totalUsers = await User.countDocuments();
-		assert.strictEqual(totalUsers, helper.initialUsers.length);
+		assert.strictEqual(totalUsers, await helper.usersInDb.length);
 	});
 
 	describe("users creation", () => {
@@ -39,7 +39,7 @@ describe("user api", () => {
 			password: "secret",
 		};
 		test("should return created user with status 201 if request is valid", async () => {
-			const totalUsersBeforeStart = await User.countDocuments();
+			const totalUsersBeforeStart = await helper.usersInDb.length;
 
 			await api
 				.post("/api/users")
@@ -47,7 +47,7 @@ describe("user api", () => {
 				.expect(201)
 				.expect("Content-Type", /application\/json/);
 
-			const totalUsersAfterStart = await User.countDocuments();
+			const totalUsersAfterStart = await helper.usersInDb.length;
 
 			assert.strictEqual(totalUsersAfterStart, totalUsersBeforeStart + 1);
 		});
