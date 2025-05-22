@@ -4,17 +4,14 @@ import blogService from "./services/blogs";
 import loginService from "./services/login";
 import Notification from "./components/Notification";
 import Toggleable from "./components/Toogleable";
+import BlogForm from "./components/BlogForm";
 
 const App = () => {
 	const [blogs, setBlogs] = useState([]);
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [user, setUser] = useState({});
-	const [blogData, setBlogData] = useState({
-		title: "",
-		author: "",
-		url: "",
-	});
+
 	const [notification, setNotification] = useState({
 		type: "",
 		msg: "",
@@ -63,13 +60,15 @@ const App = () => {
 		setUser({});
 	};
 
-	const handleBlogDataChange = (e) => {
-		console.log(e.target.name, e.target.value);
-		setBlogData({ ...blogData, [e.target.name]: e.target.value });
+	const handleShowNotification = (type, msg) => {
+		console.log(type, msg);
+		setNotification({ type, msg });
+		setTimeout(() => {
+			setNotification({ type: "", msg: "" });
+		}, 5000);
 	};
 
-	const handleCreateBlog = async (e) => {
-		e.preventDefault();
+	const handleCreateBlog = async (blogData) => {
 		try {
 			const newBlog = await blogService.createBlog(blogData);
 			setBlogs(blogs.concat(newBlog));
@@ -81,25 +80,7 @@ const App = () => {
 		} catch (error) {
 			console.error(error.response);
 			handleShowNotification("error", error.response.data.error);
-		} finally {
-			setBlogData({
-				title: "",
-				author: "",
-				url: "",
-			});
 		}
-	};
-
-	const handleShowNotification = (type, msg) => {
-		console.log(type, msg);
-		setNotification({ type, msg });
-		setTimeout(() => {
-			setNotification({ type: "", msg: "" });
-		}, 5000);
-	};
-
-	const toggleBlogFormVisibility = () => {
-		setBlogFormVisible(!blogFormVisible);
 	};
 
 	if (!user.token) {
@@ -158,39 +139,10 @@ const App = () => {
 			<Toggleable
 				buttonLabel="new note"
 				visible={blogFormVisible}
-				onToggle={toggleBlogFormVisibility}
+				onToggle={() => setBlogFormVisible(!blogFormVisible)}
 			>
 				<h3>create new</h3>
-				<form onSubmit={handleCreateBlog}>
-					<div>
-						title:
-						<input
-							value={blogData.title}
-							onChange={handleBlogDataChange}
-							type="text"
-							name="title"
-						/>
-					</div>
-					<div>
-						author:
-						<input
-							value={blogData.author}
-							onChange={handleBlogDataChange}
-							type="text"
-							name="author"
-						/>
-					</div>
-					<div>
-						url:
-						<input
-							value={blogData.url}
-							onChange={handleBlogDataChange}
-							type="text"
-							name="url"
-						/>
-					</div>
-					<button type="submit">create</button>
-				</form>
+				<BlogForm onCreateBlog={handleCreateBlog} />
 			</Toggleable>
 
 			{blogs.map((blog) => (
