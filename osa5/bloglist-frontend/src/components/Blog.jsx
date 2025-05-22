@@ -3,8 +3,10 @@ import blogService from "../services/blogs";
 
 const Blog = ({ blog, onUpdateBlog }) => {
 	const [showDetails, setShowDetails] = useState(false);
+
 	const blogStyle = {
 		paddingTop: 10,
+		paddingBottom: 10,
 		paddingLeft: 2,
 		border: "solid",
 		borderWidth: 1,
@@ -14,7 +16,7 @@ const Blog = ({ blog, onUpdateBlog }) => {
 	const handleUpdateLike = async () => {
 		const updatedBlog = {
 			...blog,
-			likes: blog.likes + 1
+			likes: blog.likes + 1,
 		};
 
 		await onUpdateBlog(updatedBlog);
@@ -27,12 +29,12 @@ const Blog = ({ blog, onUpdateBlog }) => {
 				{showDetails ? "hide" : "show"}
 			</button>
 			<div style={{ display: showDetails ? "" : "none" }}>
-				<div>{blog.url}</div>
+				<div>
+					<a href={blog.url}>{blog.url}</a>
+				</div>
 				<div>
 					likes {blog.likes}{" "}
-					<button onClick={handleUpdateLike}>
-						like
-					</button>
+					<button onClick={handleUpdateLike}>like</button>
 				</div>
 				<div>{blog.author}</div>
 			</div>
