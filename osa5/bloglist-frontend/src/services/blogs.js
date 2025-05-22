@@ -13,10 +13,15 @@ const getAll = async () => {
 };
 
 const createBlog = async (blogData) => {
+	const getToken =
+		token === null
+			? JSON.parse(window.localStorage.getItem("loggedUser")).token
+			: token;
+
 	const config = {
-		headers: { Authorization: token },
+		headers: { Authorization: `Bearer ${getToken}` },
 	};
-	console.log(config);
+	console.log(getToken);
 
 	const response = await axios.post(baseUrl, blogData, config);
 	return response.data;
