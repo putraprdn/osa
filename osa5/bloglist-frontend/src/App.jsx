@@ -1,22 +1,20 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 import Notification from "./components/Notification";
 import Toggleable from "./components/Toogleable";
 import BlogForm from "./components/BlogForm";
+import LoginForm from "./components/LoginForm";
 
 const App = () => {
 	const [blogs, setBlogs] = useState([]);
-	const [username, setUsername] = useState("");
-	const [password, setPassword] = useState("");
 	const [user, setUser] = useState({});
-
+	const [blogFormVisible, setBlogFormVisible] = useState(false);
 	const [notification, setNotification] = useState({
 		type: "",
 		msg: "",
 	});
-	const [blogFormVisible, setBlogFormVisible] = useState(false);
 
 	useEffect(() => {
 		const fetchBlogs = async () => {
@@ -31,11 +29,18 @@ const App = () => {
 		if (loggedUserJSON && loggedUserJSON !== "undefined") {
 			const user = JSON.parse(loggedUserJSON);
 			setUser(user);
+			blogService.setToken(user.token);
 		}
 	}, []);
 
-	const handleLogin = async (e) => {
-		e.preventDefault();
+	const handleShowNotification = (type, msg) => {
+		setNotification({ type, msg });
+		setTimeout(() => {
+			setNotification({ type: "", msg: "" });
+		}, 5000);
+	};
+
+	const handleLogin = async ({ username, password }) => {
 		try {
 			const response = await loginService.login({
 				username,
@@ -44,28 +49,16 @@ const App = () => {
 
 			blogService.setToken(response.token);
 			setUser(response);
-			console.log("Login response", response);
 			window.localStorage.setItem("loggedUser", JSON.stringify(response));
 		} catch (error) {
 			console.error(error.response);
 			handleShowNotification("error", error.response.data.error);
-		} finally {
-			setUsername("");
-			setPassword("");
 		}
 	};
 
 	const handleLogout = () => {
 		window.localStorage.removeItem("loggedUser");
 		setUser({});
-	};
-
-	const handleShowNotification = (type, msg) => {
-		console.log(type, msg);
-		setNotification({ type, msg });
-		setTimeout(() => {
-			setNotification({ type: "", msg: "" });
-		}, 5000);
 	};
 
 	const handleCreateBlog = async (blogData) => {
@@ -83,74 +76,43 @@ const App = () => {
 		}
 	};
 
-	if (!user.token) {
-		return (
-			<>
-				<h2>log in to application</h2>
-
-				<Notification
-					type={notification.type}
-					msg={notification.msg}
-				/>
-
-				<form onSubmit={handleLogin}>
-					<div>
-						username{" "}
-						<input
-							onChange={(e) => {
-								setUsername(e.target.value);
-							}}
-							value={username}
-							type="text"
-							name="username"
-						/>
-					</div>
-					<div>
-						password{" "}
-						<input
-							onChange={(e) => {
-								setPassword(e.target.value);
-							}}
-							value={password}
-							type="text"
-							name="password"
-						/>
-					</div>
-					<button type="submit">login</button>
-				</form>
-			</>
-		);
-	}
-
 	return (
 		<div>
-			<h2>blogs</h2>
-
 			<Notification
 				type={notification.type}
 				msg={notification.msg}
 			/>
 
-			<p>
-				{user.name} logged in{" "}
-				<button onClick={handleLogout}>logout</button>
-			</p>
+			{!user.token ? (
+				<>
+					<h2>log in to application</h2>
+					<LoginForm onLogin={handleLogin} />
+				</>
+			) : (
+				<>
+					<h2>blogs</h2>
 
-			<Toggleable
-				buttonLabel="new note"
-				visible={blogFormVisible}
-				onToggle={() => setBlogFormVisible(!blogFormVisible)}
-			>
-				<h3>create new</h3>
-				<BlogForm onCreateBlog={handleCreateBlog} />
-			</Toggleable>
+					<p>
+						{user.name} logged in{" "}
+						<button onClick={handleLogout}>logout</button>
+					</p>
 
-			{blogs.map((blog) => (
-				<Blog
-					key={blog.id}
-					blog={blog}
-				/>
-			))}
+					<Toggleable
+						buttonLabel="new note"
+						visible={blogFormVisible}
+						onToggle={() => setBlogFormVisible(!blogFormVisible)}
+					>
+						<BlogForm onCreateBlog={handleCreateBlog} />
+					</Toggleable>
+
+					{blogs.map((blog) => (
+						<Blog
+							key={blog.id}
+							blog={blog}
+						/>
+					))}
+				</>
+			)}
 		</div>
 	);
 };
