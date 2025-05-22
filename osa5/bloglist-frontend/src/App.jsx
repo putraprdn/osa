@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
@@ -80,10 +80,13 @@ const App = () => {
 
 	const handleUpdateBlog = async (updatedBlog) => {
 		try {
-			const serverUpdatedBlog = await blogService.updateBlog(updatedBlog.id, updatedBlog);
-			
-			setBlogs(prevBlogs => 
-				prevBlogs.map(blog => 
+			const serverUpdatedBlog = await blogService.updateBlog(
+				updatedBlog.id,
+				updatedBlog
+			);
+
+			setBlogs((prevBlogs) =>
+				prevBlogs.map((blog) =>
 					blog.id === serverUpdatedBlog.id ? serverUpdatedBlog : blog
 				)
 			);
@@ -98,11 +101,29 @@ const App = () => {
 		}
 	};
 
-	// Use useMemo to memoize sorted blogs
-	const sortedBlogs = useMemo(() => 
-		[...blogs].sort((a, b) => b.likes - a.likes), 
-		[blogs]
-	);
+	const handleRemoveBlog = async (blogData) => {
+		try {
+			const confirm = window.confirm(
+				`Remove blog ${blogData.title} by ${blogData.author}`
+			);
+
+			if (!confirm) return;
+
+			await blogService.removeBlog(blogData.id);
+
+			setBlogs((prevBlogs) =>
+				prevBlogs.filter((blog) => blog.id !== blogData.id)
+			);
+
+			handleShowNotification(
+				"success",
+				`Blog ${blogData.title} by ${blogData.author} removed`
+			);
+		} catch (error) {
+			console.log(error.response);
+			handleShowNotification("error", error.response.data.error);
+		}
+	};
 
 	return (
 		<div>
@@ -138,6 +159,7 @@ const App = () => {
 							key={blog.id}
 							blog={blog}
 							onUpdateBlog={handleUpdateBlog}
+							onRemoveBlog={handleRemoveBlog}
 						/>
 					))}
 				</>

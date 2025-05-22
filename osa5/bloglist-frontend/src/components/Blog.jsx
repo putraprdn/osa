@@ -1,7 +1,7 @@
 import { useState } from "react";
 import blogService from "../services/blogs";
 
-const Blog = ({ blog, onUpdateBlog }) => {
+const Blog = ({ blog, onUpdateBlog, onRemoveBlog }) => {
 	const [showDetails, setShowDetails] = useState(false);
 
 	const blogStyle = {
@@ -22,6 +22,10 @@ const Blog = ({ blog, onUpdateBlog }) => {
 		await onUpdateBlog(updatedBlog);
 	};
 
+	const handleRemoveBlog = async () => {
+		await onRemoveBlog(blog);
+	};
+
 	return (
 		<div style={blogStyle}>
 			{blog.title}{" "}
@@ -37,6 +41,12 @@ const Blog = ({ blog, onUpdateBlog }) => {
 					<button onClick={handleUpdateLike}>like</button>
 				</div>
 				<div>{blog.author}</div>
+				<button
+					onClick={handleRemoveBlog}
+					style={{ backgroundColor: "lightblue" }}
+				>
+					remove
+				</button>
 			</div>
 		</div>
 	);
