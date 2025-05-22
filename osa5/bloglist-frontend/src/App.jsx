@@ -76,6 +76,20 @@ const App = () => {
 		}
 	};
 
+	const handleUpdateBlog = async (blog) => {
+		try {
+			const updatedBlog = await blogService.updateBlog(blog.id, blog);
+			setBlogs(blogs.map((b) => (b.id === updatedBlog.id ? updatedBlog : b)));
+			handleShowNotification(
+				"success",
+				`blog ${updatedBlog.title} by ${updatedBlog.author} updated`
+			);
+		} catch (error) {
+			console.error(error.response);
+			handleShowNotification("error", error.response.data.error);
+		}
+	};
+
 	return (
 		<div>
 			<Notification
@@ -109,6 +123,7 @@ const App = () => {
 						<Blog
 							key={blog.id}
 							blog={blog}
+							onUpdateBlog={handleUpdateBlog}
 						/>
 					))}
 				</>
