@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
@@ -18,8 +18,10 @@ const App = () => {
 
 	useEffect(() => {
 		const fetchBlogs = async () => {
-			const blogs = await blogService.getAll();
-			setBlogs(blogs);
+			const fetchedBlogs = await blogService.getAll();
+			// Sort only during initial fetch
+			const sortedBlogs = fetchedBlogs.sort((a, b) => b.likes - a.likes);
+			setBlogs(sortedBlogs);
 		};
 		fetchBlogs();
 	}, []);
@@ -76,19 +78,31 @@ const App = () => {
 		}
 	};
 
-	const handleUpdateBlog = async (blog) => {
+	const handleUpdateBlog = async (updatedBlog) => {
 		try {
-			const updatedBlog = await blogService.updateBlog(blog.id, blog);
-			setBlogs(blogs.map((b) => (b.id === updatedBlog.id ? updatedBlog : b)));
+			const serverUpdatedBlog = await blogService.updateBlog(updatedBlog.id, updatedBlog);
+			
+			setBlogs(prevBlogs => 
+				prevBlogs.map(blog => 
+					blog.id === serverUpdatedBlog.id ? serverUpdatedBlog : blog
+				)
+			);
+
 			handleShowNotification(
 				"success",
-				`blog ${updatedBlog.title} by ${updatedBlog.author} updated`
+				`blog ${serverUpdatedBlog.title} updated`
 			);
 		} catch (error) {
 			console.error(error.response);
 			handleShowNotification("error", error.response.data.error);
 		}
 	};
+
+	// Use useMemo to memoize sorted blogs
+	const sortedBlogs = useMemo(() => 
+		[...blogs].sort((a, b) => b.likes - a.likes), 
+		[blogs]
+	);
 
 	return (
 		<div>
