@@ -25,4 +25,31 @@ test("renders blog", () => {
 	expect(blogAuthor).toBeDefined();
 });
 
-test("should render blog's url and likes after clicked the 'show' button ", () => {});
+test("should render blog's url and likes after clicked the 'show' button ", async () => {
+	const blog = {
+		title: "Test Blog 2",
+		author: "Test Author 2",
+		url: "https://google.com",
+		likes: 10,
+	};
+
+	const { container } = render(<Blog blog={blog} />);
+	screen.debug();
+
+	const div = container.querySelector("div.blog div");
+	expect(div).toHaveStyle("display: none");
+
+	const user = userEvent.setup();
+	const button = screen.getByText("show");
+	await user.click(button);
+
+	expect(div).not.toHaveStyle("display: none");
+
+	const urlElement = screen.getByText(blog.url);
+	expect(urlElement).toBeDefined();
+
+	const likesElement = screen.getByText(`likes ${blog.likes}`, {
+		exact: false,
+	});
+	expect(likesElement).toBeDefined();
+});
