@@ -34,6 +34,9 @@ blogRouter.post("/", async (req, res) => {
 
 	// Add saved blog to the user data
 	const updatedUserBlog = await User.findById(userDataFromToken.id);
+	if (!updatedUserBlog)
+		return res.status(401).json({ error: "invalid token" });
+
 	updatedUserBlog.blogs = updatedUserBlog.blogs.concat(savedBlog._id);
 	await updatedUserBlog.save();
 
