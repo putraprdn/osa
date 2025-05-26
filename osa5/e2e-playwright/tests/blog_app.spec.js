@@ -64,7 +64,7 @@ describe("Blog app", () => {
 			).toBeVisible();
 		});
 
-		test("can like a blog", async ({ page }) => {
+		test("user can like a blog", async ({ page }) => {
 			const showBtns = await page
 				.getByRole("button", { name: "show" })
 				.all();
@@ -77,7 +77,37 @@ describe("Blog app", () => {
 			await page.getByRole("button", { name: "like" }).click();
 
 			const successDiv = await page.locator(".success");
+			await expect(successDiv).toBeVisible();
 			await expect(successDiv).toContainText("updated");
 		});
+
+		test("user can remove their blog", async ({ page }) => {
+			// Create a new blog first
+			await page.getByRole("button", { name: "new blog" }).click();
+			await page.getByTestId("title").fill("Blog to Remove");
+			await page.getByTestId("author").fill("Test Author");
+			await page.getByTestId("url").fill("https://example.com");
+			await page.getByRole("button", { name: "create" }).click();
+
+			const showBtns = await page
+				.getByRole("button", { name: "show" })
+				.all();
+			await showBtns[0].click();
+
+			await expect(
+				await page.getByRole("button", { name: "remove" })
+			).toBeVisible();
+
+			page.on("dialog", async (dialog) => {
+				await dialog.accept();
+			});
+			await page.getByRole("button", { name: "remove" }).click();
+
+			// Wait for the success notification to appear
+			const successDiv = page.locator(".success");
+			await expect(successDiv).toBeVisible();
+			await expect(successDiv).toContainText("removed");
+		});
+
 	});
 });

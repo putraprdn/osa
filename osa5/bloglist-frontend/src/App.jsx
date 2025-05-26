@@ -144,7 +144,12 @@ const App = () => {
 
 					<p>
 						{user.name} logged in{" "}
-						<button onClick={handleLogout}>logout</button>
+						<button
+							onClick={handleLogout}
+							data-testid="logout"
+						>
+							logout
+						</button>
 					</p>
 
 					<Toggleable
