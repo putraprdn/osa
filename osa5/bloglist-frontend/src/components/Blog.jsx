@@ -40,10 +40,16 @@ const Blog = ({ blog, onUpdateBlog = () => {}, onRemoveBlog = () => {} }) => {
 				</div>
 				<div>
 					likes {blog.likes}{" "}
-					<button onClick={handleUpdateLike}>like</button>
+					<button
+						onClick={handleUpdateLike}
+						className="btn-like"
+					>
+						like
+					</button>
 				</div>
 				<div>{blog.author}</div>
 				<button
+					className="btn-remove"
 					onClick={handleRemoveBlog}
 					style={{ backgroundColor: "lightblue" }}
 				>
