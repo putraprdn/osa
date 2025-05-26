@@ -3,19 +3,21 @@ module.exports = {
 	env: {
 		browser: true,
 		es2020: true,
+		"jest/globals": true,
 	},
 	extends: [
 		"eslint:recommended",
 		"plugin:react/recommended",
 		"plugin:react/jsx-runtime",
 		"plugin:react-hooks/recommended",
+		"plugin:vitest-globals/recommended",
 	],
 	ignorePatterns: ["dist", ".eslintrc.cjs"],
 	parserOptions: { ecmaVersion: "latest", sourceType: "module" },
 	settings: { react: { version: "18.2" } },
 	plugins: ["react-refresh"],
 	rules: {
-		indent: ["error", 2],
+		indent: ["error", "tab"],
 		"linebreak-style": ["error", "windows"],
 		quotes: ["error", "double"],
 		semi: ["error", "always"],
