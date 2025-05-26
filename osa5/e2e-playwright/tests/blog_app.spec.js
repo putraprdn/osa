@@ -1,5 +1,5 @@
 import { expect, test, describe, beforeEach } from "@playwright/test";
-import { loginWith } from "./helper";
+import { createBlog, loginWith } from "./helper";
 
 describe("Blog app", () => {
 	beforeEach(async ({ page, request }) => {
@@ -45,10 +45,13 @@ describe("Blog app", () => {
 	describe("When logged in", () => {
 		beforeEach(async ({ page }) => {
 			await loginWith(page, "test", "secret");
+
+			await createBlog(page, "Test Playwright 2");
+			await createBlog(page, "Test Playwright 3");
 		});
 
 		test("a new blog can be created", async ({ page }) => {
-			await page.getByRole("button", { name: "new note" }).click();
+			await page.getByRole("button", { name: "new blog" }).click();
 			await page.getByTestId("title").fill("Test using Playwright");
 			await page.getByTestId("author").fill("Playwright");
 			await page.getByTestId("url").fill("https://google.com");
@@ -59,6 +62,22 @@ describe("Blog app", () => {
 					"a new blog Test using Playwright by Playwright added"
 				)
 			).toBeVisible();
+		});
+
+		test("can like a blog", async ({ page }) => {
+			const showBtns = await page
+				.getByRole("button", { name: "show" })
+				.all();
+			await showBtns[0].click();
+
+			await expect(
+				await page.getByRole("button", { name: "like" })
+			).toBeVisible();
+
+			await page.getByRole("button", { name: "like" }).click();
+
+			const successDiv = await page.locator(".success");
+			await expect(successDiv).toContainText("updated");
 		});
 	});
 });

@@ -149,7 +149,7 @@ const App = () => {
 
 					<Toggleable
 						ref={blogFormRef}
-						buttonLabel="new note"
+						buttonLabel="new blog"
 					>
 						<BlogForm onCreateBlog={handleCreateBlog} />
 					</Toggleable>
