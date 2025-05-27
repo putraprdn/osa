@@ -93,7 +93,7 @@ describe("Blog app", () => {
 			await expect(
 				blog.getByRole("button", { name: "remove" })
 			).toBeVisible();
-			
+
 			await page.on("dialog", (dialog) => dialog.accept());
 
 			await blog.getByRole("button", { name: "remove" }).click();
@@ -133,6 +133,38 @@ describe("Blog app", () => {
 			await expect(
 				page.getByRole("button", { name: "remove" })
 			).not.toBeVisible();
+		});
+
+		test("user can see the blogs sorted by the most likes first", async ({
+			page,
+		}) => {
+			await createBlog(page, "should be at top");
+
+			const blog = await page
+				.locator(".blog")
+				.filter({ hasText: "should be at top" });
+			await expect(blog).toBeVisible();
+
+			await blog.getByRole("button", { name: "show" }).click();
+
+			const likeBtn = await blog.getByRole("button", { name: "like" });
+			await expect(likeBtn).toBeVisible();
+
+			await likeBtn.click();
+			await likeBtn.click();
+			await likeBtn.click(); // Like it three times
+
+			const successDiv = await page.locator(".success");
+			await expect(successDiv).toBeVisible();
+			await expect(successDiv).toContainText("updated");
+
+			await page.reload();
+
+			const blogs = await page.locator(".blog");
+			const firstBlog = await blogs.first();
+
+			const firstBlogText = await firstBlog.textContent();
+			expect(firstBlogText).toContain("should be at top");
 		});
 	});
 });
