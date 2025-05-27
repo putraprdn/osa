@@ -3,6 +3,8 @@ import { useState } from "react";
 const Blog = ({ blog, onUpdateBlog = () => {}, onRemoveBlog = () => {} }) => {
 	const [showDetails, setShowDetails] = useState(false);
 
+	const userData = JSON.parse(window.localStorage.getItem("loggedUser"));
+
 	const blogStyle = {
 		paddingTop: 10,
 		paddingBottom: 10,
@@ -48,13 +50,15 @@ const Blog = ({ blog, onUpdateBlog = () => {}, onRemoveBlog = () => {} }) => {
 					</button>
 				</div>
 				<div>{blog.author}</div>
-				<button
-					className="btn-remove"
-					onClick={handleRemoveBlog}
-					style={{ backgroundColor: "lightblue" }}
-				>
-					remove
-				</button>
+				{blog.user?.username === userData?.username && (
+					<button
+						className="btn-remove"
+						onClick={handleRemoveBlog}
+						style={{ backgroundColor: "lightblue" }}
+					>
+						remove
+					</button>
+				)}
 			</div>
 		</div>
 	);
