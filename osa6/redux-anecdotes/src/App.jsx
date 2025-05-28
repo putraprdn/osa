@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import AnecdoteForm from "./components/AnecdoteForm";
 import AnecdoteList from "./components/AnecdoteList";
@@ -7,8 +7,6 @@ import Notification from "./components/Notification";
 import { initializeAnecdotes } from "./reducers/anecdoteReducer";
 
 const App = () => {
-	const notificationState = useSelector(({ notification }) => notification);
-
 	const dispatch = useDispatch();
 
 	useEffect(() => {
@@ -18,7 +16,7 @@ const App = () => {
 	return (
 		<div>
 			<h2>Anecdotes</h2>
-			{notificationState && <Notification />}
+			<Notification />
 			<Filter />
 			<AnecdoteList />
 			<AnecdoteForm />

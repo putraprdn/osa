@@ -9,6 +9,8 @@ const Notification = () => {
 
 	const notification = useSelector(({ notification }) => notification);
 
+	if (!notification) return;
+
 	return <div style={style}>{notification}</div>;
 };
 
