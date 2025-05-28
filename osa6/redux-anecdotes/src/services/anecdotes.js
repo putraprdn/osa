@@ -17,4 +17,21 @@ const create = async (content) => {
 	return response.data;
 };
 
-export default { getAll, create };
+const findById = async (id) => {
+	const response = await axios.get(`${baseUrl}/${id}`);
+	return response.data;
+};
+
+const vote = async (id) => {
+	const anecdoteToChange = await findById(id);
+
+	const updateData = {
+		...anecdoteToChange,
+		votes: anecdoteToChange.votes + 1,
+	};
+
+	const result = await axios.put(`${baseUrl}/${id}/`, updateData);
+	return result.data;
+};
+
+export default { getAll, create, findById, vote };
