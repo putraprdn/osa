@@ -5,7 +5,6 @@ import { showNotification } from "../reducers/notificationReducer";
 const AnecdoteList = () => {
 	const anecdotes = useSelector(({ filter, anecdotes }) => {
 		if (!filter) return anecdotes;
-
 		const filtered = anecdotes.filter((anecdote) =>
 			anecdote.content.toLowerCase().includes(filter.toLowerCase())
 		);
