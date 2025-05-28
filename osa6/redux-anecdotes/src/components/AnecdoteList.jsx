@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { voteAnecdote } from "../reducers/anecdoteReducer";
+import { showNotification } from "../reducers/notificationReducer";
 
 const AnecdoteList = () => {
 	const anecdotes = useSelector(({ filter, anecdotes }) => {
@@ -15,7 +16,9 @@ const AnecdoteList = () => {
 
 	const vote = (id) => {
 		console.log("vote", id);
+		const { content } = anecdotes.find((a) => a.id === id);
 		dispatch(voteAnecdote(id));
+		dispatch(showNotification(`you voted '${content}'`));
 	};
 	return (
 		<>
