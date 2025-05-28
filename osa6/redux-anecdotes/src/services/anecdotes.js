@@ -7,7 +7,7 @@ const getAll = async () => {
 	return response.data;
 };
 
-const createAnecdote = async (content) => {
+const create = async (content) => {
 	const data = {
 		content,
 		votes: 0,
@@ -17,4 +17,4 @@ const createAnecdote = async (content) => {
 	return response.data;
 };
 
-export default { getAll, createAnecdote };
+export default { getAll, create };
