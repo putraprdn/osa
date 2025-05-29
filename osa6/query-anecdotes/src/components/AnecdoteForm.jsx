@@ -18,6 +18,15 @@ const AnecdoteForm = () => {
 			);
 			notificationDispatch(`anecdote '${newAnecdote.content}' created`);
 		},
+		onError: (error, value) => {
+			if (error.response.data.error.toLowerCase().includes("too short")) {
+				notificationDispatch(
+					`anecdote '${value}' is too short. Anecdote should have 5 characters minimum`
+				);
+				return;
+			}
+			notificationDispatch(error.message);
+		},
 	});
 
 	const onCreate = (event) => {
