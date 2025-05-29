@@ -1,16 +1,35 @@
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import AnecdoteForm from "./components/AnecdoteForm";
 import Notification from "./components/Notification";
-import { getAll } from "../requests";
+import { getAll, vote as voteAnecdote } from "../requests";
 
 const App = () => {
-	const handleVote = (anecdote) => {
-		console.log("vote");
+	const queryClient = useQueryClient();
+
+	const mutateUpdatedAnecdote = useMutation({
+		mutationFn: voteAnecdote,
+		onSuccess: (updatedAnecdote) => {
+			const anecdotes = queryClient.getQueryData(["anecdotes"]);
+			const anecdoteToUpdate = anecdotes.find(
+				(a) => a.id === updatedAnecdote.id
+			);
+			console.log("anecdoteToUpdate", anecdoteToUpdate);
+			const newAnecdotes = anecdotes.map((a) =>
+				a.id !== anecdoteToUpdate.id ? a : updatedAnecdote
+			);
+			console.log("after update", newAnecdotes);
+			queryClient.setQueryData(["anecdotes"], newAnecdotes);
+		},
+	});
+
+	const handleVote = (id) => {
+		console.log("vote", id);
+
+		mutateUpdatedAnecdote.mutate(id);
 	};
 
 	const result = useQuery({
-		queryKey: ["notes"],
+		queryKey: ["anecdotes"],
 		queryFn: async () => await getAll(),
 		retry: 1,
 		refetchOnWindowFocus: false,
@@ -28,7 +47,7 @@ const App = () => {
 		);
 
 	const anecdotes = result.data;
-  console.log(anecdotes)
+	console.log(anecdotes);
 
 	return (
 		<div>
@@ -42,7 +61,7 @@ const App = () => {
 					<div>{anecdote.content}</div>
 					<div>
 						has {anecdote.votes}{" "}
-						<button onClick={() => handleVote(anecdote)}>
+						<button onClick={() => handleVote(anecdote.id)}>
 							vote
 						</button>
 					</div>

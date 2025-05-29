@@ -8,9 +8,12 @@ const AnecdoteForm = () => {
 		mutationFn: createAnecdote,
 
 		onSuccess: (newAnecdote) => {
-			const anecdotes = queryClient.getQueryData(["notes"]);
-      console.log(anecdotes)
-			queryClient.setQueryData(["notes"], anecdotes.concat(newAnecdote));
+			const anecdotes = queryClient.getQueryData(["anecdotes"]);
+			console.log(anecdotes);
+			queryClient.setQueryData(
+				["anecdotes"],
+				anecdotes.concat(newAnecdote)
+			);
 		},
 	});
 
