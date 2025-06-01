@@ -119,6 +119,12 @@ const CreateNew = (props) => {
 		});
 	};
 
+	const handleResetField = () => {
+		content.changeTo("");
+		author.changeTo("");
+		info.changeTo("");
+	};
+
 	return (
 		<div>
 			<h2>create a new anecdote</h2>
@@ -145,6 +151,12 @@ const CreateNew = (props) => {
 					/>
 				</div>
 				<button>create</button>
+				<button
+					type="button"
+					onClick={handleResetField}
+				>
+					reset
+				</button>
 			</form>
 		</div>
 	);
