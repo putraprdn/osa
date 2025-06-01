@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
-import { Link, Route, Routes, useMatch } from "react-router-dom";
+import { Link, Route, Routes, useMatch, useNavigate } from "react-router-dom";
 
 const Menu = () => {
 	const padding = {
@@ -98,6 +98,11 @@ const Footer = () => (
 	</div>
 );
 
+const Notification = ({ content }) => {
+	if (!content) return;
+	return <div>{content}</div>;
+};
+
 const CreateNew = (props) => {
 	const [content, setContent] = useState("");
 	const [author, setAuthor] = useState("");
@@ -165,16 +170,29 @@ const App = () => {
 		},
 	]);
 
+	const navigate = useNavigate();
+
 	const match = useMatch("/anecdotes/:id");
 	const matchedAnecdote = match
 		? anecdotes.find((a) => a.id === Number(match.params.id))
 		: null;
 
-	const [notification, setNotification] = useState("");
+	const [notification, setNotification] = useState(null);
 
 	const addNew = (anecdote) => {
 		anecdote.id = Math.round(Math.random() * 10000);
+		console.log("create new", anecdote);
 		setAnecdotes(anecdotes.concat(anecdote));
+		navigate("/");
+		showNotification(`a new anecdote ${anecdote.content} created`);
+	};
+
+	const showNotification = (content) => {
+		setNotification(content);
+
+		setTimeout(() => {
+			setNotification(null);
+		}, 5000);
 	};
 
 	const anecdoteById = (id) => anecdotes.find((a) => a.id === id);
@@ -194,6 +212,7 @@ const App = () => {
 		<div>
 			<h1>Software anecdotes</h1>
 			<Menu />
+			<Notification content={notification} />
 			<Routes>
 				<Route
 					path="/"
