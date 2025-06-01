@@ -1,71 +1,101 @@
-import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+const baseAPI = "https://studies.cs.helsinki.fi/restcountries/api";
 
 const useField = (type) => {
-  const [value, setValue] = useState('')
+	const [value, setValue] = useState("");
 
-  const onChange = (event) => {
-    setValue(event.target.value)
-  }
+	const onChange = (event) => {
+		setValue(event.target.value);
+	};
 
-  return {
-    type,
-    value,
-    onChange
-  }
-}
+	return {
+		type,
+		value,
+		onChange,
+	};
+};
 
 const useCountry = (name) => {
-  const [country, setCountry] = useState(null)
+	const [country, setCountry] = useState({ country: {}, found: null });
 
-  useEffect(() => {})
+	useEffect(() => {
+		const fetchCountryByName = async () => {
+			try {
+				if (!name) {
+					setCountry({ country: {}, found: null });
+					return;
+				}
 
-  return country
-}
+				const response = await axios.get(`${baseAPI}/name/${name}`);
+				setCountry({ countries: response.data, found: true });
 
-const Country = ({ country }) => {
-  if (!country) {
-    return null
-  }
+				console.log(name, response.data);
+				return response.data;
+			} catch (error) {
+				if (error.status === 404) {
+					setCountry({ country: {}, found: false });
+					console.log("error not found");
+				}
+			}
+		};
+		fetchCountryByName();
+	}, [name]);
 
-  if (!country.found) {
-    return (
-      <div>
-        not found...
-      </div>
-    )
-  }
+	return country;
+};
 
-  return (
-    <div>
-      <h3>{country.data.name} </h3>
-      <div>capital {country.data.capital} </div>
-      <div>population {country.data.population}</div> 
-      <img src={country.data.flag} height='100' alt={`flag of ${country.data.name}`}/>  
-    </div>
-  )
-}
+const Country = ({ country, found }) => {
+	if (!country && found === null) {
+		return null;
+	}
+
+	if (found === false) {
+		console.log("not found");
+		return <div>not found...</div>;
+	}
+
+	return (
+		<div>
+			<h3>{country.name.common} </h3>
+			<div>capital {country.capital} </div>
+			<div>population {country.population}</div>
+			<img
+				src={country.flags.png}
+				height="100"
+				alt={country.flags.alt}
+			/>
+		</div>
+	);
+};
 
 const App = () => {
-  const nameInput = useField('text')
-  const [name, setName] = useState('')
-  const country = useCountry(name)
+	const nameInput = useField("text");
+	const [name, setName] = useState("");
+	const country = useCountry(name);
 
-  const fetch = (e) => {
-    e.preventDefault()
-    setName(nameInput.value)
-  }
+	console.log("hehehe", country);
 
-  return (
-    <div>
-      <form onSubmit={fetch}>
-        <input {...nameInput} />
-        <button>find</button>
-      </form>
+	const fetch = async (e) => {
+		e.preventDefault();
+		const countryToSearch = nameInput.value;
+		setName(countryToSearch);
+	};
 
-      <Country country={country} />
-    </div>
-  )
-}
+	return (
+		<div>
+			<form onSubmit={fetch}>
+				<input {...nameInput} />
+				<button>find</button>
+			</form>
 
-export default App
+			<Country
+				country={country.countries}
+				found={country.found}
+			/>
+		</div>
+	);
+};
+
+export default App;
