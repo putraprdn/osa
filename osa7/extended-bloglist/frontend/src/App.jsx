@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
+import { Route, Routes } from "react-router-dom";
 import { resetUser } from "./reducers/userReducer";
 import { setBlogs } from "./reducers/blogReducer";
 import { showNotification } from "./reducers/notificationReducer";
@@ -9,10 +10,15 @@ import Toggleable from "./components/Toogleable";
 import BlogForm from "./components/BlogForm";
 import LoginForm from "./components/LoginForm";
 import BlogList from "./components/BlogList";
+import UserList from "./components/UserList";
 import blogService from "./services/blogs";
+import userService from "./services/users";
+import Navbar from "./components/Navbar";
 
 const App = () => {
 	const dispatch = useDispatch();
+
+	const [userList, setUserList] = useState([]);
 
 	const user = useSelector(({ user }) => user);
 	const blogs = useSelector(({ blogs }) => blogs);
@@ -25,8 +31,23 @@ const App = () => {
 			const sortedBlogs = fetchedBlogs.sort((a, b) => b.likes - a.likes);
 			dispatch(setBlogs(sortedBlogs));
 		};
+
 		fetchBlogs();
 	}, []);
+
+	useEffect(() => {
+		const fetchUsers = async () => {
+			const users = await userService.getAll();
+			const sortedUsers = users.sort(
+				(a, b) => b.blogs.length - a.blogs.length
+			);
+			setUserList(sortedUsers);
+		};
+
+		console.log('users')
+
+		fetchUsers();
+	}, [blogs]);
 
 	const blogFormRef = useRef();
 
@@ -57,6 +78,7 @@ const App = () => {
 
 	return (
 		<div>
+			<Navbar />
 			<Notification />
 
 			{!user.token ? (
@@ -68,24 +90,45 @@ const App = () => {
 				<>
 					<h2>blogs</h2>
 
-					<p>
-						{user.name} logged in{" "}
-						<button
-							onClick={handleLogout}
-							data-testid="logout"
-						>
-							logout
-						</button>
-					</p>
-
-					<Toggleable
-						ref={blogFormRef}
-						buttonLabel="new blog"
+					<p>{user.name} logged in </p>
+					<button
+						onClick={handleLogout}
+						data-testid="logout"
 					>
-						<BlogForm onCreateBlog={handleCreateBlog} />
-					</Toggleable>
+						logout
+					</button>
 
-					<BlogList blogs={blogs} />
+					<Routes>
+						<Route
+							path="/"
+							element={
+								<div style={{ marginTop: "20px" }}>
+									<Toggleable
+										ref={blogFormRef}
+										buttonLabel="new blog"
+									>
+										<BlogForm
+											onCreateBlog={handleCreateBlog}
+										/>
+									</Toggleable>
+
+									<BlogList blogs={blogs} />
+								</div>
+							}
+						/>
+						<Route
+							path="/users"
+							element={<UserList users={userList} />}
+						/>
+						{/* <Route
+							path="/anecdotes/:id"
+							element={<Anecdote anecdote={matchedAnecdote} />}
+						/> */}
+						{/* <Route
+							path="/create"
+							element={<CreateNew addNew={addNew} />}
+						/> */}
+					</Routes>
 				</>
 			)}
 		</div>
