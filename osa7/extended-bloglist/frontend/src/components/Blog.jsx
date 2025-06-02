@@ -68,43 +68,6 @@ const Blog = ({ blog }) => {
 		}
 	};
 
-	// const handleRemoveBlog = async (blogData) => {
-	// 	try {
-	// 		const confirm = window.confirm(
-	// 			`Remove blog ${blogData.title} by ${blogData.author}`
-	// 		);
-
-	// 		if (!confirm) return;
-
-	// 		await blogService.removeBlog(blogData.id);
-
-	// 		setBlogs((prevBlogs) =>
-	// 			prevBlogs.filter((blog) => blog.id !== blogData.id)
-	// 		);
-
-	// 		handleShowNotification(
-	// 			"success",
-	// 			`Blog ${blogData.title} by ${blogData.author} removed`
-	// 		);
-	// 	} catch (error) {
-	// 		console.log(error.response);
-	// 		handleShowNotification("error", error.response.data.error);
-	// 	}
-	// };
-
-	// const handleUpdateLike = async () => {
-	// 	const updatedBlog = {
-	// 		...blog,
-	// 		likes: blog.likes + 1,
-	// 	};
-
-	// 	await onUpdateBlog(updatedBlog);
-	// };
-
-	// const handleRemoveBlog = async () => {
-	// 	await onRemoveBlog(blog);
-	// };
-
 	return (
 		<div
 			style={blogStyle}

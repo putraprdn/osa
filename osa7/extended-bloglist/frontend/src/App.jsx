@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useMatch } from "react-router-dom";
 import { resetUser } from "./reducers/userReducer";
 import { setBlogs } from "./reducers/blogReducer";
 import { showNotification } from "./reducers/notificationReducer";
@@ -11,14 +11,22 @@ import BlogForm from "./components/BlogForm";
 import LoginForm from "./components/LoginForm";
 import BlogList from "./components/BlogList";
 import UserList from "./components/UserList";
+import Navbar from "./components/Navbar";
+import User from "./components/User";
 import blogService from "./services/blogs";
 import userService from "./services/users";
-import Navbar from "./components/Navbar";
 
 const App = () => {
 	const dispatch = useDispatch();
 
 	const [userList, setUserList] = useState([]);
+
+	const match = useMatch("/users/:id");
+	const matchedUser = match
+		? userList.find((a) => a.id === match.params.id)
+		: null;
+
+	console.log(matchedUser);
 
 	const user = useSelector(({ user }) => user);
 	const blogs = useSelector(({ blogs }) => blogs);
@@ -43,8 +51,6 @@ const App = () => {
 			);
 			setUserList(sortedUsers);
 		};
-
-		console.log('users')
 
 		fetchUsers();
 	}, [blogs]);
@@ -120,14 +126,10 @@ const App = () => {
 							path="/users"
 							element={<UserList users={userList} />}
 						/>
-						{/* <Route
-							path="/anecdotes/:id"
-							element={<Anecdote anecdote={matchedAnecdote} />}
-						/> */}
-						{/* <Route
-							path="/create"
-							element={<CreateNew addNew={addNew} />}
-						/> */}
+						<Route
+							path="/users/:id"
+							element={<User user={matchedUser} />}
+						/>
 					</Routes>
 				</>
 			)}
