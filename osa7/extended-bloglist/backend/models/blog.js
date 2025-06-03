@@ -5,6 +5,7 @@ const blogSchema = mongoose.Schema({
 	author: String,
 	url: String,
 	likes: Number,
+	comments: Array,
 	user: {
 		ref: "User",
 		type: mongoose.Schema.Types.ObjectId,

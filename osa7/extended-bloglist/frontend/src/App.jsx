@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { Route, Routes, useMatch } from "react-router-dom";
-import { resetUser } from "./reducers/userReducer";
+import { Route, Routes } from "react-router-dom";
 import { setBlogs } from "./reducers/blogReducer";
 import { showNotification } from "./reducers/notificationReducer";
+import { setUser } from "./reducers/userReducer";
 import Notification from "./components/Notification";
 import Toggleable from "./components/Toogleable";
 import BlogForm from "./components/BlogForm";
@@ -13,6 +13,7 @@ import BlogList from "./components/BlogList";
 import UserList from "./components/UserList";
 import Navbar from "./components/Navbar";
 import User from "./components/User";
+import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import userService from "./services/users";
 

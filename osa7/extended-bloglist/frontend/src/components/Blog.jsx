@@ -59,6 +59,26 @@ const Blog = ({ blogs }) => {
 		}
 	};
 
+	const handleComment = async (e) => {
+		e.preventDefault();
+		const comment = e.target.comment.value.trim();
+		if (!comment) return;
+		
+		const updateData = await blogService.addComment(
+			matchedBlog.id,
+			comment
+		);
+
+		const newBlogs = blogs.map((b) => {
+			return b.id === updateData.id ? updateData : b;
+		});
+
+		dispatch(setBlogs(newBlogs));
+		dispatch(showNotification("success", `comment '${comment}' added`));
+	};
+
+	if (!matchedBlog) return <p>Blog not found.</p>;
+
 	return (
 		<div className="container mt-4">
 			<h2>{matchedBlog.title}</h2>
@@ -89,6 +109,29 @@ const Blog = ({ blogs }) => {
 					remove
 				</button>
 			)}
+
+			<div className="mt-4">
+				<h3>Comments</h3>
+				<form onSubmit={handleComment}>
+					<input
+						type="text"
+						name="comment"
+						className="form-control mb-2"
+						placeholder="Add a comment"
+					/>
+					<button className="btn btn-success">Add Comment</button>
+				</form>
+				<ul className="list-group mt-2">
+					{matchedBlog.comments &&
+						matchedBlog.comments.map((comment, idx) => (
+							<li
+								key={idx}
+								className="list-group-item"
+							>
+								{comment}
+							</li>
+						))}
+				</ul>
 			</div>
 		</div>
 	);

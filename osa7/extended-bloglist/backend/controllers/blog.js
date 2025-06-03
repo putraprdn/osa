@@ -71,6 +71,21 @@ blogRouter.put("/:id", async (req, res) => {
 
 	res.status(200).json(updatedBlog);
 });
+
+blogRouter.post("/:id/comments", async (req, res) => {
+	const id = req.params.id;
+	const body = req.body;
+
+	const blog = await Blog.findById(id).populate("user", {
+		name: 1,
+		username: 1,
+	});
+
+	const newComment = body.comment;
+	blog.comments.push(newComment);
+	const savedBlog = await blog.save();
+	console.log("saved", savedBlog);
+	res.status(200).json(savedBlog);
 });
 
 blogRouter.delete("/:id", async (req, res) => {
