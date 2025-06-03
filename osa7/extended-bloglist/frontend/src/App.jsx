@@ -21,13 +21,6 @@ const App = () => {
 
 	const [userList, setUserList] = useState([]);
 
-	const match = useMatch("/users/:id");
-	const matchedUser = match
-		? userList.find((a) => a.id === match.params.id)
-		: null;
-
-	console.log(matchedUser);
-
 	const user = useSelector(({ user }) => user);
 	const blogs = useSelector(({ blogs }) => blogs);
 
@@ -40,7 +33,16 @@ const App = () => {
 			dispatch(setBlogs(sortedBlogs));
 		};
 
+		const fetchUser = () => {
+			const getUser = user?.username
+				? user
+				: JSON.parse(window.localStorage.getItem("user"));
+
+			dispatch(setUser(getUser));
+		};
+
 		fetchBlogs();
+		fetchUser();
 	}, []);
 
 	useEffect(() => {
@@ -56,10 +58,6 @@ const App = () => {
 	}, [blogs]);
 
 	const blogFormRef = useRef();
-
-	const handleLogout = () => {
-		dispatch(resetUser());
-	};
 
 	const handleCreateBlog = async (blogData) => {
 		try {
@@ -83,7 +81,7 @@ const App = () => {
 	};
 
 	return (
-		<div>
+		<div className="container">
 			<Navbar />
 			<Notification />
 
@@ -95,14 +93,6 @@ const App = () => {
 			) : (
 				<>
 					<h2>blogs</h2>
-
-					<p>{user.name} logged in </p>
-					<button
-						onClick={handleLogout}
-						data-testid="logout"
-					>
-						logout
-					</button>
 
 					<Routes>
 						<Route
@@ -128,7 +118,11 @@ const App = () => {
 						/>
 						<Route
 							path="/users/:id"
-							element={<User user={matchedUser} />}
+							element={<User users={userList} />}
+						/>
+						<Route
+							path="/blogs/:id"
+							element={<Blog blogs={blogs} />}
 						/>
 					</Routes>
 				</>

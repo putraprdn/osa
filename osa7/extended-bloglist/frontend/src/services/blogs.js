@@ -8,11 +8,12 @@ const setToken = (newToken) => {
 };
 
 const getValidToken = () => {
+	console.log("token is: ", token);
 	const processedToken =
 		token === null
-			? JSON.parse(window.localStorage.getItem("loggedUser")).token
+			? JSON.parse(window.localStorage.getItem("user")).token
 			: token;
-
+	console.log("processed: ", processedToken);
 	const formattedToken = processedToken.startsWith("Bearer ")
 		? processedToken
 		: `Bearer ${processedToken}`;

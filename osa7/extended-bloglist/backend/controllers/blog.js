@@ -62,11 +62,15 @@ blogRouter.put("/:id", async (req, res) => {
 
 	const updatedBlog = await Blog.findByIdAndUpdate(id, updateFields, {
 		new: true,
+	}).populate("user", {
+		name: 1,
+		username: 1,
 	});
 
 	if (!updatedBlog) return res.status(404).json({ error: "Blog not found" });
 
-	res.json(updatedBlog);
+	res.status(200).json(updatedBlog);
+});
 });
 
 blogRouter.delete("/:id", async (req, res) => {

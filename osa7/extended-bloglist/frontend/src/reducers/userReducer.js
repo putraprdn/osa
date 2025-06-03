@@ -1,11 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const initialState = {
+	username: "",
+	name: "",
+};
+
 const userSlice = createSlice({
 	name: "user",
-	initialState: {},
+	initialState,
 	reducers: {
 		setUser(state, action) {
-			console.log("in the reducer", action.payload);
 			return action.payload;
 		},
 	},
@@ -13,7 +17,7 @@ const userSlice = createSlice({
 
 export const resetUser = () => {
 	return async (dispatch) => {
-		dispatch(setUser({}));
+		dispatch(setUser(initialState));
 	};
 };
 

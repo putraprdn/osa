@@ -1,27 +1,17 @@
-import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { useMatch, useNavigate } from "react-router-dom";
 import { setBlogs } from "../reducers/blogReducer";
 import { showNotification } from "../reducers/notificationReducer";
 import blogService from "../services/blogs";
-import { useSelector } from "react-redux";
 
-const Blog = ({ blog }) => {
-	const [showDetails, setShowDetails] = useState(false);
-
-	const currentBlogs = useSelector(({ blogs }) => blogs);
-
+const Blog = ({ blogs }) => {
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
 
+	const match = useMatch("/blogs/:id");
+	const matchedBlog = blogs.find((b) => b.id === match.params.id);
 	const userData = useSelector(({ user }) => user);
-
-	const blogStyle = {
-		paddingTop: 10,
-		paddingBottom: 10,
-		paddingLeft: 2,
-		border: "solid",
-		borderWidth: 1,
-		marginBottom: 5,
-	};
 
 	const handleVote = async (blogToUpdate) => {
 		try {
@@ -35,12 +25,11 @@ const Blog = ({ blog }) => {
 				updateField
 			);
 
-			const newBlogs = currentBlogs.map((b) => {
+			const newBlogs = blogs.map((b) => {
 				return b.id === updatedBlog.id ? updatedBlog : b;
 			});
 
 			dispatch(setBlogs(newBlogs));
-
 			dispatch(
 				showNotification(
 					"success",
@@ -49,59 +38,57 @@ const Blog = ({ blog }) => {
 			);
 		} catch (error) {
 			console.error(error);
-			dispatch(showNotification("error", error?.response?.data?.error));
+			dispatch(
+				showNotification("error", error?.response?.data?.error || error)
+			);
 		}
 	};
 
 	const handleRemove = async (id) => {
 		try {
 			await blogService.removeBlog(id);
-
-			const newBlogs = currentBlogs.filter((b) => {
-				return b.id !== id;
-			});
+			const newBlogs = blogs.filter((b) => b.id !== id);
 			dispatch(setBlogs(newBlogs));
 			dispatch(showNotification("success", "blog removed"));
+			navigate("/");
 		} catch (error) {
 			console.error(error);
-			dispatch(showNotification("error", error?.response?.data?.error));
+			dispatch(
+				showNotification("error", error?.response?.data?.error || error)
+			);
 		}
 	};
 
 	return (
-		<div
-			style={blogStyle}
-			className="blog"
-		>
-			{blog.title}{" "}
-			<button onClick={() => setShowDetails(!showDetails)}>
-				{showDetails ? "hide" : "show"}
-			</button>
-			<div style={{ display: showDetails ? "" : "none" }}>
-				<div>
-					<a href={blog.url}>{blog.url}</a>
-				</div>
+		<div className="container mt-4">
+			<h2>{matchedBlog.title}</h2>
+			<div>
+				<a
+					href={matchedBlog.url}
+					className="text-primary"
+				>
+					{matchedBlog.url}
+				</a>
+			</div>
+			<div className="my-3">
+				likes {matchedBlog.likes}{" "}
+				<button
+					onClick={() => handleVote(matchedBlog)}
+					className="btn btn-primary"
+				>
+					like
+				</button>
+			</div>
+			<div>added by {matchedBlog.author}</div>
 
-				<div>
-					likes {blog.likes}{" "}
-					<button
-						onClick={() => handleVote(blog)}
-						className="btn-like"
-					>
-						like
-					</button>
-				</div>
-				<div>{blog.author}</div>
-
-				{blog.user?.username === userData?.username && (
-					<button
-						className="btn-remove"
-						onClick={() => handleRemove(blog.id)}
-						style={{ backgroundColor: "lightblue" }}
-					>
-						remove
-					</button>
-				)}
+			{matchedBlog.user?.username === userData?.username && (
+				<button
+					className="btn btn-danger"
+					onClick={() => handleRemove(matchedBlog.id)}
+				>
+					remove
+				</button>
+			)}
 			</div>
 		</div>
 	);
