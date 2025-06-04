@@ -1,7 +1,6 @@
-import { useState } from "react";
-
-const Authors = (props) => {
-	const [authors, setAuthors] = useState(props.authors.allAuthors);
+/* eslint-disable react/prop-types */
+const Authors = ({ authors: propAuthors }) => {
+	const authors = propAuthors.allAuthors || [];
 
 	return (
 		<div>
@@ -14,7 +13,7 @@ const Authors = (props) => {
 						<th>books</th>
 					</tr>
 					{authors.map((a) => (
-						<tr key={a.name}>
+						<tr key={a.id}>
 							<td>{a.name}</td>
 							<td>{a.born}</td>
 							<td>{a.bookCount}</td>

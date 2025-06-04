@@ -3,12 +3,13 @@ import Authors from "./components/Authors";
 import Books from "./components/Books";
 import NewBook from "./components/NewBook";
 import { useQuery } from "@apollo/client";
-import { GET_ALL_AUTHORS } from "./queries";
+import { GET_ALL_AUTHORS, GET_ALL_BOOKS } from "./queries";
 
 const App = () => {
-	const result = useQuery(GET_ALL_AUTHORS);
+	const authorQuery = useQuery(GET_ALL_AUTHORS);
+	const bookQuery = useQuery(GET_ALL_BOOKS);
 
-	if (result.loading) {
+	if (authorQuery.loading || bookQuery.loading) {
 		return <div>loading...</div>;
 	}
 
@@ -35,11 +36,11 @@ const App = () => {
 			<Routes>
 				<Route
 					path="/"
-					element={<Authors authors={result.data} />}
+					element={<Authors authors={authorQuery.data} />}
 				/>
 				<Route
 					path="/books"
-					element={<Books />}
+					element={<Books books={bookQuery.data} />}
 				/>
 				<Route
 					path="/books/create"

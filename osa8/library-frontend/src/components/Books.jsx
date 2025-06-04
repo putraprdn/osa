@@ -1,32 +1,29 @@
-const Books = (props) => {
-  if (!props.show) {
-    return null
-  }
+/* eslint-disable react/prop-types */
+const Books = ({ books: propBooks }) => {
+	const books = propBooks.allBooks;
 
-  const books = []
+	return (
+		<div>
+			<h2>books</h2>
 
-  return (
-    <div>
-      <h2>books</h2>
+			<table>
+				<tbody>
+					<tr>
+						<th></th>
+						<th>author</th>
+						<th>published</th>
+					</tr>
+					{books.map((b) => (
+						<tr key={b.id}>
+							<td>{b.title}</td>
+							<td>{b.author}</td>
+							<td>{b.published}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	);
+};
 
-      <table>
-        <tbody>
-          <tr>
-            <th></th>
-            <th>author</th>
-            <th>published</th>
-          </tr>
-          {books.map((a) => (
-            <tr key={a.title}>
-              <td>{a.title}</td>
-              <td>{a.author}</td>
-              <td>{a.published}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-export default Books
+export default Books;
