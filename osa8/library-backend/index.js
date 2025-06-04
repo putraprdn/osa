@@ -109,6 +109,11 @@ const typeDefs = `
             author: String!
             genres: [String!]!
         ): Book
+
+        editAuthor(
+            name: String!
+            born: Int!
+        ): Author
     }
 
     type Query {
@@ -169,6 +174,19 @@ const resolvers = {
 			}
 
 			return book;
+		},
+		editAuthor: (root, args) => {
+			const authorToChange = authors.find((a) => a.name === args.name);
+
+			if (!authorToChange) return null;
+
+			authorToChange.born = args.born;
+
+			authors.map((a) =>
+				a.name === authorToChange.name ? { ...a, ...authorToChange } : a
+			);
+
+			return authorToChange;
 		},
 	},
 };
