@@ -1,6 +1,25 @@
 const { ApolloServer } = require("@apollo/server");
 const { startStandaloneServer } = require("@apollo/server/standalone");
-const { v1: uuid } = require("uuid");
+const { GraphQLError } = require("graphql");
+const mongoose = require("mongoose");
+
+mongoose.set("strictQuery", false);
+
+const Author = require("./models/author");
+const Book = require("./models/book");
+
+require("dotenv").config();
+
+const MONGO_URI = process.env.MONGO_URI;
+
+mongoose
+	.connect(MONGO_URI)
+	.then(() => {
+		console.log("Connected to MongoDB");
+	})
+	.catch((error) => {
+		console.log("Error connection to MongoDB", error);
+	});
 
 let authors = [
 	{
@@ -89,10 +108,10 @@ let books = [
 const typeDefs = `
     type Book {
         title: String!
-        published: Int!
-        author: String!
-        id: ID!
-        genres: [String!]!
+		published: Int!
+		author: Author!
+		genres: [String!]!
+		id: ID!
     }
 
     type Author {
@@ -160,20 +179,28 @@ const resolvers = {
 		},
 	},
 	Mutation: {
-		addBook: (root, args) => {
-			const book = { ...args, id: uuid() };
-			books.push(book);
-
-			if (!authors.includes(args.author)) {
-				const newAuthor = {
-					name: args.author,
-					bookCount: 1,
-					id: uuid(),
-				};
-				authors.push(newAuthor);
+		addBook: async (root, args) => {
+			const author = await Author.findOne({ name: args.author });
+			if (!author) {
+				console.log("no author found");
+				return null;
 			}
 
-			return book;
+			args.author = author._id;
+			const createBook = new Book(args);
+
+			try {
+				await createBook.save();
+			} catch (error) {
+				console.log(error);
+				throw new GraphQLError("failed to create book", {
+					extensions: {
+						code: "BAD_USER_INPUT",
+					},
+				});
+			}
+
+			return createBook;
 		},
 		editAuthor: (root, args) => {
 			const authorToChange = authors.find((a) => a.name === args.name);
