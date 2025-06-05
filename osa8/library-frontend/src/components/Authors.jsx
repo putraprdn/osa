@@ -1,38 +1,48 @@
 import { useMutation } from "@apollo/client";
-import { useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import Select from "react-select";
 import { GET_ALL_AUTHORS, UPDATE_AUTHOR_BORN } from "../queries";
 
 /* eslint-disable react/prop-types */
 const Authors = ({ authors: propAuthors }) => {
-	const [authorBornFields, setAuthorBornFields] = useState({
-		name: "",
-		born: "",
-	});
+	const [born, setBorn] = useState("");
+	const [selectedOption, setSelectedOption] = useState(null);
 
 	const [updateAuthor] = useMutation(UPDATE_AUTHOR_BORN, {
 		refetchQueries: [{ query: GET_ALL_AUTHORS }],
 	});
 
-	const authors = propAuthors.allAuthors || [];
+	const authors = useMemo(() => propAuthors.allAuthors || [], [propAuthors]);
 
-	const handleOnChange = (e) => {
-		setAuthorBornFields({
-			...authorBornFields,
-			[e.target.name]: e.target.value,
-		});
-		console.log(authorBornFields);
-	};
+	const [options, setOptions] = useState([]);
+
+	useEffect(() => {
+		const populate = () => {
+			const populatedOptions = authors.map((a) => {
+				return {
+					value: a.name,
+					label: a.name,
+				};
+			});
+
+			console.log(populatedOptions);
+			setOptions(populatedOptions);
+		};
+
+		populate();
+	}, [authors]);
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
 
 		updateAuthor({
 			variables: {
-				...authorBornFields,
-				born: parseInt(authorBornFields.born),
+				name: selectedOption.value,
+				born: parseInt(born),
 			},
 		});
-		setAuthorBornFields({ name: "", born: "" });
+		setBorn("");
+		setSelectedOption(null);
 	};
 
 	return (
@@ -58,19 +68,20 @@ const Authors = ({ authors: propAuthors }) => {
 			<h3>Set birthyear</h3>
 			<form onSubmit={handleSubmit}>
 				<div>
-					name{" "}
-					<input
-						value={authorBornFields.name}
-						onChange={handleOnChange}
-						type="text"
-						name="name"
+					<Select
+						value={selectedOption}
+						options={options}
+						onChange={setSelectedOption}
+						name="born"
 					/>
 				</div>
 				<div>
 					born{" "}
 					<input
-						value={authorBornFields.born}
-						onChange={handleOnChange}
+						value={born}
+						onChange={(e) => {
+							setBorn(e.target.value);
+						}}
 						type="number"
 						name="born"
 					/>
