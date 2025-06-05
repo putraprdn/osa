@@ -192,27 +192,34 @@ const resolvers = {
 	},
 	Mutation: {
 		addBook: async (root, args) => {
-			const author = await Author.findOne({ name: args.author });
-			if (!author) {
-				console.log("no author found");
-				return null;
-			}
-
-			args.author = author._id;
-			const createBook = new Book(args);
-
 			try {
+				let author = await Author.findOne({ name: args.author });
+				if (!author) {
+					// Create new author
+					author = await Author.create({ name: args.author });
+				}
+
+				args.author = author._id;
+				const createBook = new Book(args);
+
 				await createBook.save();
+				return createBook;
 			} catch (error) {
-				console.log(error);
-				throw new GraphQLError("failed to create book", {
+				console.log(JSON.stringify(error));
+				let errorCode = "BAD_USER_INPUT";
+				let errorMsg = "failed to create book";
+
+				if (error.name === "ValidationError") {
+					errorCode = error.name;
+					errorMsg = error.message;
+				}
+
+				throw new GraphQLError(errorMsg, {
 					extensions: {
-						code: "BAD_USER_INPUT",
+						code: errorCode,
 					},
 				});
 			}
-
-			return createBook;
 		},
 		editAuthor: async (root, args) => {
 			return Author.findOneAndUpdate(
