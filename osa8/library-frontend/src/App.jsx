@@ -27,12 +27,6 @@ const App = () => {
 				</Link>
 			</div>
 
-			{/* <Authors show={page === "authors"} />
-
-			<Books show={page === "books"} />
-
-			<NewBook show={page === "add"} /> */}
-
 			<Routes>
 				<Route
 					path="/"
