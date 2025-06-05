@@ -7,6 +7,7 @@ mongoose.set("strictQuery", false);
 
 const Author = require("./models/author");
 const Book = require("./models/book");
+const book = require("./models/book");
 
 require("dotenv").config();
 
@@ -145,24 +146,35 @@ const typeDefs = `
 
 const resolvers = {
 	Query: {
-		bookCount: () => books.length,
-		authorCount: () => authors.length,
-		allBooks: (root, args) => {
-			let filteredBooks = books;
+		bookCount: async () => {
+			const totalBooks = await Book.countDocuments();
+
+			return totalBooks;
+		},
+		authorCount: async () => {
+			const totalAuthors = Author.countDocuments();
+
+			return totalAuthors;
+		},
+		allBooks: async (root, args) => {
+			const filter = {};
 
 			if (args.author) {
-				filteredBooks = filteredBooks.filter(
-					(b) => b.author === args.author
-				);
+				const { _id } =
+					(await Author.findOne({ name: args.author }).select(
+						"_id"
+					)) || {};
+				if (_id) filter.author = _id;
 			}
 
 			if (args.genre) {
-				filteredBooks = filteredBooks.filter((b) =>
-					b.genres.includes(args.genre)
-				);
+				filter.genres = { $in: args.genre };
 			}
 
-			return filteredBooks;
+			return await Book.find(filter).populate({
+				path: "author",
+				select: "name id born",
+			});
 		},
 		allAuthors: () => {
 			const arr = [];
@@ -202,18 +214,12 @@ const resolvers = {
 
 			return createBook;
 		},
-		editAuthor: (root, args) => {
-			const authorToChange = authors.find((a) => a.name === args.name);
-
-			if (!authorToChange) return null;
-
-			authorToChange.born = args.born;
-
-			authors.map((a) =>
-				a.name === authorToChange.name ? { ...a, ...authorToChange } : a
+		editAuthor: async (root, args) => {
+			return Author.findOneAndUpdate(
+				{ name: args.name },
+				{ born: parseInt(args.born) },
+				{ new: true }
 			);
-
-			return authorToChange;
 		},
 	},
 };
