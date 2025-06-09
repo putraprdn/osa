@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 /* eslint-disable react/prop-types */
 const Books = ({ books: propBooks }) => {
-	const books = propBooks.allBooks;
+	const books = propBooks;
 	const [filteredBooks, setFilteredBooks] = useState(books);
 
 	const [genre, setGenre] = useState("");

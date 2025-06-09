@@ -334,7 +334,7 @@ startStandaloneServer(server, {
 			const cleanToken = auth.replace("Bearer ", "");
 
 			const decodedToken = jwt.verify(cleanToken, process.env.JWT_SECRET);
-
+			
 			const currentUser = await User.findById(decodedToken.id);
 
 			return { currentUser };

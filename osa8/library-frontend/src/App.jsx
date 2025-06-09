@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import { useApolloClient, useQuery } from "@apollo/client";
 import Authors from "./components/Authors";
@@ -5,7 +6,7 @@ import Books from "./components/Books";
 import NewBook from "./components/NewBook";
 import { GET_ALL_AUTHORS, GET_ALL_BOOKS } from "./queries";
 import LoginForm from "./components/LoginForm";
-import { useEffect, useState } from "react";
+import RecommendedBooks from "./components/RecommendedBooks";
 
 const App = () => {
 	const authorQuery = useQuery(GET_ALL_AUTHORS);
@@ -44,6 +45,9 @@ const App = () => {
 						<Link to={"/books/create"}>
 							<button>add book</button>
 						</Link>
+						<Link to={"/books/recommend"}>
+							<button>recommend</button>
+						</Link>
 						<button onClick={handleLogout}>logout</button>
 					</>
 				)}
@@ -61,7 +65,11 @@ const App = () => {
 				/>
 				<Route
 					path="/books"
-					element={<Books books={bookQuery.data} />}
+					element={<Books books={bookQuery.data.allBooks} />}
+				/>
+				<Route
+					path="/books/recommend"
+					element={<RecommendedBooks books={bookQuery.data.allBooks} />}
 				/>
 				<Route
 					path="/books/create"

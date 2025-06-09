@@ -27,6 +27,16 @@ export const GET_ALL_BOOKS = gql`
 	}
 `;
 
+export const CURRENT_USER = gql`
+	query {
+		me {
+			id
+			username
+			favoriteGenre
+		}
+	}
+`;
+
 export const ADD_BOOK = gql`
 	mutation createBook(
 		$title: String!
