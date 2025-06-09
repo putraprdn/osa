@@ -1,22 +1,17 @@
 import { useQuery } from "@apollo/client";
-import { CURRENT_USER } from "../queries";
-import { useEffect, useState } from "react";
+import { GET_ALL_BOOKS } from "../queries";
 
 /* eslint-disable react/prop-types */
-const RecommendedBooks = ({ books }) => {
-	const [favoriteBooks, setFavoriteBooks] = useState([]);
-	const currentUser = useQuery(CURRENT_USER);
+const RecommendedBooks = ({ user }) => {
+	const favoriteGenre = user?.favoriteGenre;
 
-	const favoriteGenre = currentUser.data.me?.favoriteGenre || "";
+	const { data, loading } = useQuery(GET_ALL_BOOKS);
 
-	useEffect(() => {
-		if (favoriteGenre) {
-			const filteredBooks = books.filter((b) =>
-				b.genres.includes(favoriteGenre)
-			);
-			setFavoriteBooks(filteredBooks);
-		}
-	}, []);
+	if (loading || !favoriteGenre) return <div>loading...</div>;
+
+	const favoriteBooks = data.allBooks.filter((b) =>
+		b.genres.includes(favoriteGenre)
+	);
 
 	return (
 		<div>

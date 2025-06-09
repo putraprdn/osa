@@ -1,24 +1,28 @@
 import { useEffect, useState } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, useNavigate } from "react-router-dom";
 import { useApolloClient, useQuery } from "@apollo/client";
 import Authors from "./components/Authors";
 import Books from "./components/Books";
 import NewBook from "./components/NewBook";
-import { GET_ALL_AUTHORS, GET_ALL_BOOKS } from "./queries";
+import { CURRENT_USER, GET_ALL_AUTHORS, GET_ALL_BOOKS } from "./queries";
 import LoginForm from "./components/LoginForm";
 import RecommendedBooks from "./components/RecommendedBooks";
 
 const App = () => {
+	const client = useApolloClient();
+
+	const navigate = useNavigate();
+
 	const authorQuery = useQuery(GET_ALL_AUTHORS);
 	const bookQuery = useQuery(GET_ALL_BOOKS);
-
-	const client = useApolloClient();
+	const userQuery = useQuery(CURRENT_USER);
 
 	const [token, setToken] = useState("");
 
 	useEffect(() => {
 		const localToken = localStorage.getItem("user-token") || "";
 		setToken(localToken);
+		if (!localToken) navigate("/login");
 	}, []);
 
 	if (authorQuery.loading || bookQuery.loading) {
@@ -29,6 +33,7 @@ const App = () => {
 		setToken(null);
 		localStorage.clear();
 		client.resetStore();
+		navigate("/login");
 	};
 
 	return (
@@ -69,7 +74,13 @@ const App = () => {
 				/>
 				<Route
 					path="/books/recommend"
-					element={<RecommendedBooks books={bookQuery.data.allBooks} />}
+					element={
+						userQuery.loading ? (
+							<div>loading...</div>
+						) : (
+							<RecommendedBooks user={userQuery.data?.me} />
+						)
+					}
 				/>
 				<Route
 					path="/books/create"

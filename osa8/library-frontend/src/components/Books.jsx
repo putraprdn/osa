@@ -1,30 +1,44 @@
+import { useQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
+import { GET_ALL_BOOKS } from "../queries";
 
 /* eslint-disable react/prop-types */
-const Books = ({ books: propBooks }) => {
-	const books = propBooks;
-	const [filteredBooks, setFilteredBooks] = useState(books);
-
-	const [genre, setGenre] = useState("");
+const Books = ({ books: booksProp }) => {
+	const [genre, setGenre] = useState(null);
+	const [books, setBooks] = useState(booksProp);
 	const [genreOptions, setGenreOptions] = useState([]);
 
-	const handleOnChangeGenre = (genre) => {
-		setGenre(genre);
+	const bookQuery = useQuery(GET_ALL_BOOKS, {
+		variables: { genre },
+		skip: !genre,
+	});
 
+	useEffect(() => {
+		(() => {
+			const genres = [...new Set(books.map((b) => b.genres).flat())];
+			setGenreOptions(genres);
+			console.log("rendered");
+		})();
+	}, [booksProp]);
+
+	useEffect(() => {
+		if (bookQuery.data && genre) {
+			setBooks(bookQuery.data.allBooks);
+		}
+		console.log("fetched book");
+	}, [bookQuery.data, genre]);
+
+	if (bookQuery.loading) return <div>loading...</div>;
+
+	const handleOnChangeGenre = async (genre) => {
 		if (genre === "all") {
 			setGenre("");
-			setFilteredBooks(books);
+			setBooks(booksProp);
 			return;
 		}
 
-		const filtered = books.filter((b) => b.genres.includes(genre));
-		setFilteredBooks(filtered);
+		setGenre(genre);
 	};
-
-	useEffect(() => {
-		const genres = [...new Set(books.map((b) => b.genres).flat())];
-		setGenreOptions(genres);
-	}, []);
 
 	return (
 		<div>
@@ -41,7 +55,7 @@ const Books = ({ books: propBooks }) => {
 						<th>author</th>
 						<th>published</th>
 					</tr>
-					{filteredBooks.map((b) => (
+					{books.map((b) => (
 						<tr key={b.id}>
 							<td>{b.title}</td>
 							<td>{b.author.name}</td>
