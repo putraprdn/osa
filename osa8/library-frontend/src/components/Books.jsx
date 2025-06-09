@@ -19,7 +19,7 @@ const Books = ({ books: booksProp }) => {
 			setGenreOptions(genres);
 			console.log("rendered");
 		})();
-	}, [booksProp]);
+	}, [bookQuery.data, booksProp]);
 
 	useEffect(() => {
 		if (bookQuery.data && genre) {
