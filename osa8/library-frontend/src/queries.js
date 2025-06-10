@@ -1,5 +1,19 @@
 import { gql } from "@apollo/client";
 
+const BOOKS_DETAILS = gql`
+	fragment BookDetails on Book {
+		id
+		title
+		genres
+		author {
+			name
+			id
+			born
+		}
+		published
+	}
+`;
+
 export const GET_ALL_AUTHORS = gql`
 	query {
 		allAuthors {
@@ -14,17 +28,10 @@ export const GET_ALL_AUTHORS = gql`
 export const GET_ALL_BOOKS = gql`
 	query ($author: String, $genre: String) {
 		allBooks(author: $author, genre: $genre) {
-			id
-			title
-			genres
-			author {
-				name
-				id
-				born
-			}
-			published
+			...BookDetails
 		}
 	}
+	${BOOKS_DETAILS}
 `;
 
 export const CURRENT_USER = gql`
@@ -79,4 +86,13 @@ export const LOGIN = gql`
 			value
 		}
 	}
+`;
+
+export const SUB_BOOK_ADDED = gql`
+	subscription {
+		bookAdded {
+			...BookDetails
+		}
+	}
+	${BOOKS_DETAILS}
 `;

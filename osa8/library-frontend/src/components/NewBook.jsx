@@ -2,6 +2,7 @@ import { useMutation } from "@apollo/client";
 import { useState } from "react";
 import { ADD_BOOK, GET_ALL_BOOKS } from "../queries";
 import { useNavigate } from "react-router-dom";
+import { updateCache } from "../App";
 
 const NewBook = () => {
 	const [newBookFields, setNewBookFields] = useState({
@@ -16,12 +17,7 @@ const NewBook = () => {
 
 	const [createBook] = useMutation(ADD_BOOK, {
 		update: (cache, response) => {
-			cache.updateQuery({ query: GET_ALL_BOOKS }, ({ allBooks }) => {
-				console.log(response);
-				return {
-					allBooks: allBooks.concat(response.data.addBook),
-				};
-			});
+			updateCache(cache, { query: GET_ALL_BOOKS }, response.data.addBook);
 		},
 	});
 

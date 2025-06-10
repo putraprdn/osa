@@ -1,12 +1,35 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, Link, useNavigate } from "react-router-dom";
-import { useApolloClient, useQuery } from "@apollo/client";
+
+import { useApolloClient, useQuery, useSubscription } from "@apollo/client";
+
+import {
+	CURRENT_USER,
+	GET_ALL_AUTHORS,
+	GET_ALL_BOOKS,
+	SUB_BOOK_ADDED,
+} from "./queries";
+import LoginForm from "./components/LoginForm";
 import Authors from "./components/Authors";
 import Books from "./components/Books";
 import NewBook from "./components/NewBook";
-import { CURRENT_USER, GET_ALL_AUTHORS, GET_ALL_BOOKS } from "./queries";
-import LoginForm from "./components/LoginForm";
 import RecommendedBooks from "./components/RecommendedBooks";
+
+export const updateCache = (cache, query, addedBook) => {
+	const uniqByTitle = (a) => {
+		let seen = new Set();
+		return a.filter((item) => {
+			let k = item.title;
+			return seen.has(k) ? false : seen.add(k);
+		});
+	};
+
+	cache.updateQuery(query, ({ allBooks }) => {
+		return {
+			allBooks: uniqByTitle(allBooks.concat(addedBook)),
+		};
+	});
+};
 
 const App = () => {
 	const client = useApolloClient();
@@ -18,6 +41,16 @@ const App = () => {
 	const userQuery = useQuery(CURRENT_USER);
 
 	const [token, setToken] = useState("");
+
+	useSubscription(SUB_BOOK_ADDED, {
+		onData: ({ data, client }) => {
+			const addedBook = data.data.bookAdded;
+			console.log(`'${addedBook.title}' added`);
+			alert(`${addedBook.title} added`)
+
+			updateCache(client.cache, { query: GET_ALL_BOOKS }, addedBook);
+		},
+	});
 
 	useEffect(() => {
 		const localToken = localStorage.getItem("user-token") || "";
