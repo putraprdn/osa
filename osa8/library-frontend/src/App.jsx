@@ -24,9 +24,13 @@ export const updateCache = (cache, query, addedBook) => {
 		});
 	};
 
-	cache.updateQuery(query, ({ allBooks }) => {
+	console.log(addedBook);
+
+	cache.updateQuery(query, (data) => {
+		if (!data || !data.allBooks) return { allBooks: [addedBook] };
+		const filtered = uniqByTitle(data.allBooks.concat(addedBook));
 		return {
-			allBooks: uniqByTitle(allBooks.concat(addedBook)),
+			allBooks: filtered,
 		};
 	});
 };
@@ -45,9 +49,7 @@ const App = () => {
 	useSubscription(SUB_BOOK_ADDED, {
 		onData: ({ data, client }) => {
 			const addedBook = data.data.bookAdded;
-			console.log(`'${addedBook.title}' added`);
-			alert(`${addedBook.title} added`)
-
+			window.alert(`${addedBook.title} added`);
 			updateCache(client.cache, { query: GET_ALL_BOOKS }, addedBook);
 		},
 	});

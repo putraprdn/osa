@@ -40,7 +40,31 @@ const resolvers = {
 			});
 		},
 		allAuthors: async () => {
-			return Author.find({});
+			const authors = await Author.find({}).lean();
+
+			const authorsWithBookCount = await Book.aggregate([
+				{
+					$group: {
+						_id: "$author",
+						bookCount: { $sum: 1 },
+					},
+				},
+			]);
+
+			// Map the authors to include the book count
+			const authorsWithCounts = authors.map((author) => {
+				const count = authorsWithBookCount.find(
+					(a) => a._id.toString() === author._id.toString()
+				);
+				return {
+					id: author._id,
+					name: author.name,
+					born: author.born,
+					bookCount: count ? count.bookCount : 0,
+				};
+			});
+
+			return authorsWithCounts;
 		},
 		me: (root, args, context) => {
 			return context.currentUser;

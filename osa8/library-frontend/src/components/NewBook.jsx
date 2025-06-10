@@ -1,7 +1,7 @@
 import { useMutation } from "@apollo/client";
 import { useState } from "react";
 import { ADD_BOOK, GET_ALL_BOOKS } from "../queries";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { updateCache } from "../App";
 
 const NewBook = () => {
@@ -13,7 +13,7 @@ const NewBook = () => {
 	});
 	const [genres, setGenres] = useState([]);
 
-	const navigate = useNavigate();
+	// const navigate = useNavigate();
 
 	const [createBook] = useMutation(ADD_BOOK, {
 		update: (cache, response) => {
@@ -38,10 +38,11 @@ const NewBook = () => {
 
 		createBook({ variables: dataToSubmit });
 		setNewBookFields({ title: "", author: "", published: "", genre: "" });
-		navigate("/books");
+		// navigate("/books");
 	};
 
 	const addGenre = () => {
+		if (!newBookFields.genre) return;
 		setGenres(genres.concat(newBookFields.genre));
 		setNewBookFields({ ...newBookFields, genre: "" });
 	};
