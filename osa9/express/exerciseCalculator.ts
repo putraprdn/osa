@@ -15,6 +15,7 @@ const calculateExercises = (exerciseArr: number[], target: number): Result => {
 
 	let total = 0;
 	exerciseArr.map((e) => {
+		if (isNaN(e)) throw new Error("array should only contains numbers");
 		total += e;
 	});
 	const average = total / periodLength;
@@ -53,9 +54,16 @@ const calculateExercises = (exerciseArr: number[], target: number): Result => {
 	return result;
 };
 
-const target: number = Number(process.argv[2]);
-const trainingDaysArgs: number[] = [
-	...process.argv.slice(3, process.argv.length),
-].map((e) => Number(e));
-calculateExercises(trainingDaysArgs, target);
-console.log("direct pass: ", calculateExercises([3, 0, 2, 4.5, 0, 3, 1], 2));
+if (require.main === module) {
+	const target: number = Number(process.argv[2]);
+	const trainingDaysArgs: number[] = [
+		...process.argv.slice(3, process.argv.length),
+	].map((e) => Number(e));
+	calculateExercises(trainingDaysArgs, target);
+	console.log(
+		"direct pass: ",
+		calculateExercises([3, 0, 2, 4.5, 0, 3, 1], 2)
+	);
+}
+
+export default calculateExercises;

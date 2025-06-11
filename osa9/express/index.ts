@@ -1,5 +1,6 @@
 import express from "express";
 import calculateBmi from "./bmiCalculator";
+import calculateExercises from "./exerciseCalculator";
 
 const app = express();
 
@@ -15,7 +16,7 @@ app.get("/bmi", (req, res) => {
 	const weight = Number(query.weight);
 
 	if (isNaN(height) || isNaN(weight) || height <= 0 || weight <= 0) {
-		res.status(400).json({ error: "malformatted parameters" });
+		res.status(400).json({ error: "malformed parameters" });
 		return;
 	}
 
@@ -26,6 +27,32 @@ app.get("/bmi", (req, res) => {
 		weight,
 		bmi,
 	});
+});
+
+app.post("/exercises", (req, res) => {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+	const daily_exercises: number[] = req.body.daily_exercises || null;
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+	const target: number = req.body.target || null;
+
+	if (!(daily_exercises && target)) {
+		res.status(400).json({
+			error: "malformed parameters",
+		});
+		return;
+	}
+
+	try {
+		const result = calculateExercises(daily_exercises, target);
+		res.json(result);
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			console.log(error.message);
+			res.status(400).json({ error: error.message });
+			return;
+		}
+		res.status(400).json({ error: "something happened" });
+	}
 });
 
 const PORT = 3000;
