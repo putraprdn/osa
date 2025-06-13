@@ -16,6 +16,7 @@ const App = () => {
 		weather: Weather.Stormy,
 		comment: "",
 	});
+	const [error, setError] = useState("");
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -28,6 +29,14 @@ const App = () => {
 		fetchData();
 	}, []);
 
+	const showError = (msg: string) => {
+		setError(msg);
+
+		setTimeout(() => {
+			setError("");
+		}, 5000);
+	};
+
 	const handleOnChange = (e: React.FormEvent<HTMLInputElement>) => {
 		setNewEntryFields({
 			...newEntryFields,
@@ -37,19 +46,35 @@ const App = () => {
 	};
 
 	const handleSubmit = async (e: React.SyntheticEvent) => {
-		e.preventDefault();
-		const response = await axios.post<DiaryEntry>(
-			`${BASE_URL}/api/diaries`,
-			newEntryFields
-		);
-		setDiaries(diaries.concat(response.data));
-		console.log(response.data);
+		try {
+			e.preventDefault();
+			const response = await axios.post<DiaryEntry>(
+				`${BASE_URL}/api/diaries`,
+				newEntryFields
+			);
+			setDiaries(diaries.concat(response.data));
+			setNewEntryFields({
+				date: "",
+				visibility: Visibility.Good,
+				weather: Weather.Stormy,
+				comment: "",
+			});
+			console.log(response.data);
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				showError(`Failed to add new diary. ${error?.response?.data}`);
+				console.log(error);
+				return;
+			}
+			console.log(error);
+		}
 	};
 
 	return (
 		<div>
 			<div>
 				<h2>Add new entry</h2>
+				{error && <p style={{ color: "red" }}>{error}</p>}
 				<form onSubmit={handleSubmit}>
 					<div>
 						date{" "}
