@@ -81,27 +81,140 @@ const App = () => {
 						<input
 							onChange={handleOnChange}
 							value={newEntryFields.date}
-							type="text"
+							type="date"
 							name="date"
 						/>
 					</div>
 					<div>
 						visibility{" "}
-						<input
-							onChange={handleOnChange}
-							value={newEntryFields.visibility}
-							type="text"
-							name="visibility"
-						/>
+						<div>
+							<label>
+								<input
+									type="radio"
+									name="visibility"
+									value={Visibility.Great}
+									checked={
+										newEntryFields.visibility ===
+										Visibility.Great
+									}
+									onChange={handleOnChange}
+								/>
+								Great
+							</label>
+
+							<label>
+								<input
+									type="radio"
+									name="visibility"
+									value={Visibility.Good}
+									checked={
+										newEntryFields.visibility ===
+										Visibility.Good
+									}
+									onChange={handleOnChange}
+								/>
+								Good
+							</label>
+
+							<label>
+								<input
+									type="radio"
+									name="visibility"
+									value={Visibility.Ok}
+									checked={
+										newEntryFields.visibility ===
+										Visibility.Ok
+									}
+									onChange={handleOnChange}
+								/>
+								Ok
+							</label>
+
+							<label>
+								<input
+									type="radio"
+									name="visibility"
+									value={Visibility.Poor}
+									checked={
+										newEntryFields.visibility ===
+										Visibility.Poor
+									}
+									onChange={handleOnChange}
+								/>
+								Poor
+							</label>
+						</div>
 					</div>
 					<div>
 						weather{" "}
-						<input
-							onChange={handleOnChange}
-							value={newEntryFields.weather}
-							type="text"
-							name="weather"
-						/>
+						<div>
+							<label>
+								<input
+									type="radio"
+									name="weather"
+									value={Weather.Sunny}
+									checked={
+										newEntryFields.weather === Weather.Sunny
+									}
+									onChange={handleOnChange}
+								/>
+								Sunny
+							</label>
+
+							<label>
+								<input
+									type="radio"
+									name="weather"
+									value={Weather.Cloudy}
+									checked={
+										newEntryFields.weather ===
+										Weather.Cloudy
+									}
+									onChange={handleOnChange}
+								/>
+								Cloudy
+							</label>
+
+							<label>
+								<input
+									type="radio"
+									name="weather"
+									value={Weather.Windy}
+									checked={
+										newEntryFields.weather === Weather.Windy
+									}
+									onChange={handleOnChange}
+								/>
+								Windy
+							</label>
+
+							<label>
+								<input
+									type="radio"
+									name="weather"
+									value={Weather.Rainy}
+									checked={
+										newEntryFields.weather === Weather.Rainy
+									}
+									onChange={handleOnChange}
+								/>
+								Rainy
+							</label>
+
+							<label>
+								<input
+									type="radio"
+									name="weather"
+									value={Weather.Stormy}
+									checked={
+										newEntryFields.weather ===
+										Weather.Stormy
+									}
+									onChange={handleOnChange}
+								/>
+								Stormy
+							</label>
+						</div>
 					</div>
 					<div>
 						comment{" "}
