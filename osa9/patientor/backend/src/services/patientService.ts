@@ -16,6 +16,18 @@ const getAll = (): PublicPatientDataType[] => {
 	return cleanedData;
 };
 
+const findById = (patientId: string): PublicPatientDataType | undefined => {
+	const userFound = patients.find((p) => p.id === patientId);
+
+	return userFound ? {
+		id: userFound.id,
+		name: userFound.name,
+		gender: userFound.gender,
+		dateOfBirth: userFound.dateOfBirth,
+		occupation: userFound.occupation,
+	} : undefined;
+};
+
 const create = (data: NewPatientType): PublicPatientDataType => {
 	const newData = {
 		id: uuid(),
@@ -27,5 +39,6 @@ const create = (data: NewPatientType): PublicPatientDataType => {
 
 export default {
 	getAll,
+	findById,
 	create,
 };

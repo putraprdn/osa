@@ -21,6 +21,14 @@ patientRouter.get("/", (_req, res: Response<PublicPatientDataType[]>) => {
 	return res.send(patientService.getAll());
 });
 
+patientRouter.get(
+	"/:id",
+	(req, res: Response<PublicPatientDataType | undefined>) => {
+		const { id: patientId } = req.params;
+		return res.send(patientService.findById(patientId));
+	}
+);
+
 patientRouter.post(
 	"/",
 	newPatientParser,
