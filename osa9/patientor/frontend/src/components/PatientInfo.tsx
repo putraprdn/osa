@@ -7,11 +7,13 @@ import FemaleIcon from "@mui/icons-material/Female";
 import MaleIcon from "@mui/icons-material/Male";
 
 import { apiBaseUrl } from "../constants";
-import { Gender, Patient } from "../types";
+import { Diagnosis, Gender, Patient } from "../types";
 
 const PatientInfo = () => {
 	const match = useMatch("/patients/:id");
+
 	const [patient, setPatient] = useState<Patient>();
+	const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
 
 	useEffect(() => {
 		const fetch = async () => {
@@ -25,24 +27,53 @@ const PatientInfo = () => {
 		fetch();
 	}, [match?.params.id]);
 
+	useEffect(() => {
+		const fetchDiagnoses = async () => {
+			const response = await axios.get(`${apiBaseUrl}/diagnoses`);
+			setDiagnoses(response.data);
+		};
+		fetchDiagnoses();
+	}, []);
+
 	if (!patient || !Object.values(patient).length)
 		return <div>patient not found</div>;
 
 	return (
 		<div>
-			<h2>
-				{patient?.name}{" "}
-				<span>
-					{patient.gender === Gender.Female ? (
-						<FemaleIcon />
-					) : (
-						<MaleIcon />
-					)}
-				</span>
-			</h2>
+			<div>
+				<h2>
+					{patient?.name}{" "}
+					<span>
+						{patient.gender === Gender.Female ? (
+							<FemaleIcon />
+						) : (
+							<MaleIcon />
+						)}
+					</span>
+				</h2>
 
-			<div>ssn: {patient.ssn}</div>
-			<div>occupation: {patient.occupation}</div>
+				<div>ssn: {patient.ssn}</div>
+				<div>occupation: {patient.occupation}</div>
+			</div>
+
+			<div>
+				<h3>entries</h3>
+				{patient &&
+					patient.entries.map((e) => (
+						<div key={e.id}>
+							<p>
+								{e.date} {e.description}
+							</p>
+							{e.diagnosisCodes && (
+								<ul>
+									{diagnoses.filter(d=>e.diagnosisCodes?.includes(d.code)).map(d => (
+										<li key={d.code}>{d.code} {d.name}</li>
+									))}
+								</ul>
+							)}
+						</div>
+					))}
+			</div>
 		</div>
 	);
 };
