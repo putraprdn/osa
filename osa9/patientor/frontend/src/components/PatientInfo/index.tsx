@@ -6,14 +6,14 @@ import axios from "axios";
 import FemaleIcon from "@mui/icons-material/Female";
 import MaleIcon from "@mui/icons-material/Male";
 
-import { apiBaseUrl } from "../constants";
-import { Diagnosis, Gender, Patient } from "../types";
+import { apiBaseUrl } from "../../constants";
+import { Gender, Patient } from "../../types";
+import PatientEntry from "./PatientEntryType";
 
 const PatientInfo = () => {
 	const match = useMatch("/patients/:id");
 
 	const [patient, setPatient] = useState<Patient>();
-	const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
 
 	useEffect(() => {
 		const fetch = async () => {
@@ -26,14 +26,6 @@ const PatientInfo = () => {
 
 		fetch();
 	}, [match?.params.id]);
-
-	useEffect(() => {
-		const fetchDiagnoses = async () => {
-			const response = await axios.get(`${apiBaseUrl}/diagnoses`);
-			setDiagnoses(response.data);
-		};
-		fetchDiagnoses();
-	}, []);
 
 	if (!patient || !Object.values(patient).length)
 		return <div>patient not found</div>;
@@ -60,18 +52,10 @@ const PatientInfo = () => {
 				<h3>entries</h3>
 				{patient &&
 					patient.entries.map((e) => (
-						<div key={e.id}>
-							<p>
-								{e.date} {e.description}
-							</p>
-							{e.diagnosisCodes && (
-								<ul>
-									{diagnoses.filter(d=>e.diagnosisCodes?.includes(d.code)).map(d => (
-										<li key={d.code}>{d.code} {d.name}</li>
-									))}
-								</ul>
-							)}
-						</div>
+						<PatientEntry
+							key={e.id}
+							entry={e}
+						/>
 					))}
 			</div>
 		</div>
