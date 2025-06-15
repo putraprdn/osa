@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import patientService from "../services/patientService";
-import { NewPatientType, PublicPatientDataType } from "../types";
+import { NewPatientType, PatientType, PublicPatientDataType } from "../types";
 import { NewPatientSchema } from "../utils";
 import { z } from "zod";
 
@@ -21,13 +21,10 @@ patientRouter.get("/", (_req, res: Response<PublicPatientDataType[]>) => {
 	return res.send(patientService.getAll());
 });
 
-patientRouter.get(
-	"/:id",
-	(req, res: Response<PublicPatientDataType | undefined>) => {
-		const { id: patientId } = req.params;
-		return res.send(patientService.findById(patientId));
-	}
-);
+patientRouter.get("/:id", (req, res: Response<PatientType | undefined>) => {
+	const { id: patientId } = req.params;
+	return res.send(patientService.findById(patientId));
+});
 
 patientRouter.post(
 	"/",

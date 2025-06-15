@@ -1,5 +1,5 @@
 import patients from "../data/patients";
-import { NewPatientType, PublicPatientDataType } from "../types";
+import { NewPatientType, PatientType, PublicPatientDataType } from "../types";
 import { v1 as uuid } from "uuid";
 
 const getAll = (): PublicPatientDataType[] => {
@@ -16,16 +16,8 @@ const getAll = (): PublicPatientDataType[] => {
 	return cleanedData;
 };
 
-const findById = (patientId: string): PublicPatientDataType | undefined => {
-	const userFound = patients.find((p) => p.id === patientId);
-
-	return userFound ? {
-		id: userFound.id,
-		name: userFound.name,
-		gender: userFound.gender,
-		dateOfBirth: userFound.dateOfBirth,
-		occupation: userFound.occupation,
-	} : undefined;
+const findById = (patientId: string): PatientType | undefined => {
+	return patients.find((p) => p.id === patientId);
 };
 
 const create = (data: NewPatientType): PublicPatientDataType => {
