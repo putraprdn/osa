@@ -1,6 +1,11 @@
 import express, { NextFunction, Request, Response } from "express";
 import patientService from "../services/patientService";
-import { NewPatientType, PatientType, PublicPatientDataType } from "../types";
+import {
+	NewPatientEntryType,
+	NewPatientType,
+	PatientType,
+	PublicPatientDataType,
+} from "../types";
 import { NewPatientSchema } from "../utils";
 import { z } from "zod";
 
@@ -37,6 +42,15 @@ patientRouter.post(
 		res.json(newPatient);
 	}
 );
+
+patientRouter.post("/:id/entries", (req, res) => {
+	const id = req.params.id;
+	const newPatientEntry = patientService.createEntry(
+		id,
+		req.body as NewPatientEntryType
+	);
+	res.json(newPatientEntry);
+});
 
 const errorMiddleware = (
 	error: unknown,

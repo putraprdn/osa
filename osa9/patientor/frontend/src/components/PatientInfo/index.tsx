@@ -7,25 +7,57 @@ import FemaleIcon from "@mui/icons-material/Female";
 import MaleIcon from "@mui/icons-material/Male";
 
 import { apiBaseUrl } from "../../constants";
-import { Gender, Patient } from "../../types";
+import { Gender, Patient, Diagnosis, NewPatientEntryType } from "../../types";
 import PatientEntry from "./PatientEntryType";
+import { Button } from "@mui/material";
+import AddPatientEntryModal from "./AddPatientEntryModal";
 
 const PatientInfo = () => {
 	const match = useMatch("/patients/:id");
 
 	const [patient, setPatient] = useState<Patient>();
+	const [toggleModal, setToggleModal] = useState<boolean>(false);
+
+	const [diagnoseCodeOptions, setDiagnoseCodeOptions] = useState<Diagnosis[]>(
+		[]
+	);
 
 	useEffect(() => {
-		const fetch = async () => {
-			const response = await axios.get<Patient>(
-				`${apiBaseUrl}/patients/${match?.params.id}`
-			);
-			console.log(response.data);
-			setPatient(response.data);
+		const fetchPatient = async () => {
+			try {
+				const [patientResponse, diagnosesResponse] = await Promise.all([
+					axios.get<Patient>(
+						`${apiBaseUrl}/patients/${match?.params.id}`
+					),
+					axios.get<Diagnosis[]>(`${apiBaseUrl}/diagnoses`),
+				]);
+
+				setPatient(patientResponse.data);
+				setDiagnoseCodeOptions(diagnosesResponse.data);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+			}
 		};
 
-		fetch();
+		fetchPatient();
 	}, [match?.params.id]);
+
+	const handleOnSubmit = async (newEntry: NewPatientEntryType) => {
+		try {
+			console.log('called')
+			const response = await axios.post<Patient>(
+				`${apiBaseUrl}/patients/${match?.params.id}/entries`,
+				newEntry
+			);
+			if (!response?.data) throw new Error("failed to create new entry");
+			// Update patient's entries
+			setPatient(response.data);
+
+			console.log("Updated patient:", patient);
+		} catch (error) {
+			console.log(error);
+		}
+	};
 
 	if (!patient || !Object.values(patient).length)
 		return <div>patient not found</div>;
@@ -58,6 +90,22 @@ const PatientInfo = () => {
 						/>
 					))}
 			</div>
+
+			<AddPatientEntryModal
+				diagnoseOptions={diagnoseCodeOptions}
+				modalOpen={toggleModal}
+				onToggle={() => setToggleModal(!toggleModal)}
+				onSubmit={handleOnSubmit}
+			/>
+
+			<Button
+				onClick={() => setToggleModal(true)}
+				style={{ marginTop: 20 }}
+				variant="contained"
+				color="primary"
+			>
+				Add entry
+			</Button>
 		</div>
 	);
 };

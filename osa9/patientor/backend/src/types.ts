@@ -69,7 +69,7 @@ export type EntryType =
 type UnionOmit<T, K extends string | number | symbol> = T extends unknown
 	? Omit<T, K>
 	: never;
-export type EntryWithoutId = UnionOmit<EntryType, "id">;
+export type NewPatientEntryType = UnionOmit<EntryType, "id">;
 
 export type NewPatientType = z.infer<typeof NewPatientSchema>;
 
