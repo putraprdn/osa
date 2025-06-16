@@ -8,6 +8,7 @@ import {
 	Grid,
 	Button,
 	SelectChangeEvent,
+	Input,
 } from "@mui/material";
 
 import ReactSelect, { ActionMeta } from "react-select";
@@ -182,11 +183,13 @@ const AddPatientEntryForm = ({
 	return (
 		<div>
 			<form onSubmit={addEntry}>
-				<TextField
-					label="Date"
+				<InputLabel style={{ marginTop: 20 }}>Date</InputLabel>
+				<Input
+					name="date"
 					placeholder="YYYY-MM-DD"
 					fullWidth
 					value={date}
+					type={"date"}
 					onChange={({ target }) => setDate(target.value)}
 				/>
 				<InputLabel style={{ marginTop: 20 }}>Type</InputLabel>
