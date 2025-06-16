@@ -10,6 +10,8 @@ import {
 	SelectChangeEvent,
 } from "@mui/material";
 
+import ReactSelect, { ActionMeta } from "react-select";
+
 import {
 	Diagnosis,
 	HealthCheckRating,
@@ -48,7 +50,7 @@ const AddPatientEntryForm = ({
 	);
 	const [specialist, setSpecialist] = useState("");
 	const [description, setDescription] = useState("");
-	const [diagnoseCode, setDiagnoseCode] = useState("");
+	const [diagnoseCode, setDiagnoseCode] = useState<string[]>([]);
 
 	// HealthCheck-specific field
 	const [healthCheckRating, setHealthCheckRating] =
@@ -103,15 +105,15 @@ const AddPatientEntryForm = ({
 		}
 	};
 
-	const onDiagnoseCodeChange = (event: SelectChangeEvent<string>) => {
-		event.preventDefault();
-		if (typeof event.target.value === "string") {
-			const value = event.target.value;
-			const matched = diagnoseOptions.find((t) => t.code === value)?.code;
-			if (matched) {
-				setDiagnoseCode(matched);
-			}
-		}
+	const onDiagnoseCodeChange = (
+		selectedOptions: readonly DiagnoseCodeOption[],
+		_actionMeta: ActionMeta<DiagnoseCodeOption>
+	) => {
+		console.log(selectedOptions);
+		const newSelectedOptions: string[] = selectedOptions.map(
+			(o) => o.value
+		);
+		setDiagnoseCode(newSelectedOptions);
 	};
 
 	const addEntry = (event: SyntheticEvent) => {
@@ -126,7 +128,8 @@ const AddPatientEntryForm = ({
 					date,
 					description,
 					specialist,
-					diagnosisCodes: diagnoseCode ? [diagnoseCode] : undefined,
+					diagnosisCodes:
+						diagnoseCode.length > 0 ? diagnoseCode : undefined,
 					healthCheckRating,
 				};
 				break;
@@ -137,7 +140,8 @@ const AddPatientEntryForm = ({
 					date,
 					description,
 					specialist,
-					diagnosisCodes: diagnoseCode ? [diagnoseCode] : undefined,
+					diagnosisCodes:
+						diagnoseCode.length > 0 ? diagnoseCode : undefined,
 					discharge:
 						dischargeDate && dischargeCriteria
 							? {
@@ -154,7 +158,8 @@ const AddPatientEntryForm = ({
 					date,
 					description,
 					specialist,
-					diagnosisCodes: diagnoseCode ? [diagnoseCode] : undefined,
+					diagnosisCodes:
+						diagnoseCode.length > 0 ? diagnoseCode : undefined,
 					employerName,
 					sickLeave:
 						sickLeaveStartDate && sickLeaveEndDate
@@ -209,21 +214,17 @@ const AddPatientEntryForm = ({
 				/>
 
 				<InputLabel style={{ marginTop: 20 }}>Diagnose Code</InputLabel>
-				<Select
-					label="Diagnose Code"
-					fullWidth
-					value={diagnoseCode}
+				<ReactSelect
+					isMulti
+					value={diagnoseCodeOptions.filter((option) =>
+						diagnoseCode.includes(option.value)
+					)}
 					onChange={onDiagnoseCodeChange}
-				>
-					{diagnoseCodeOptions?.map((option) => (
-						<MenuItem
-							key={option.label}
-							value={option.value}
-						>
-							{option.label}
-						</MenuItem>
-					))}
-				</Select>
+					options={diagnoseCodeOptions}
+					styles={{
+						container: (base) => ({ ...base, width: "100%" }),
+					}}
+				/>
 
 				<TextField
 					label="Description"

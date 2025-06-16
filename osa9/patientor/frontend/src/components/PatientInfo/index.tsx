@@ -9,14 +9,16 @@ import MaleIcon from "@mui/icons-material/Male";
 import { apiBaseUrl } from "../../constants";
 import { Gender, Patient, Diagnosis, NewPatientEntryType } from "../../types";
 import PatientEntry from "./PatientEntryType";
-import { Button } from "@mui/material";
+import { Alert, Button } from "@mui/material";
 import AddPatientEntryModal from "./AddPatientEntryModal";
+import WarningIcon from "@mui/icons-material/Warning";
 
 const PatientInfo = () => {
 	const match = useMatch("/patients/:id");
 
 	const [patient, setPatient] = useState<Patient>();
 	const [toggleModal, setToggleModal] = useState<boolean>(false);
+	const [error, setError] = useState("");
 
 	const [diagnoseCodeOptions, setDiagnoseCodeOptions] = useState<Diagnosis[]>(
 		[]
@@ -42,20 +44,35 @@ const PatientInfo = () => {
 		fetchPatient();
 	}, [match?.params.id]);
 
+	const showError = (message: string) => {
+		setError(message);
+
+		setTimeout(() => {
+			setError("");
+		}, 5000);
+	};
+
 	const handleOnSubmit = async (newEntry: NewPatientEntryType) => {
 		try {
-			console.log('called')
 			const response = await axios.post<Patient>(
 				`${apiBaseUrl}/patients/${match?.params.id}/entries`,
 				newEntry
 			);
-			if (!response?.data) throw new Error("failed to create new entry");
+			// if (!response?.data) throw new Error("failed to create new entry");
 			// Update patient's entries
 			setPatient(response.data);
 
 			console.log("Updated patient:", patient);
 		} catch (error) {
-			console.log(error);
+			if (error instanceof Error) {
+				console.log(error.message);
+				showError(error.message);
+			} else if (axios.isAxiosError(error)) {
+				console.log(error.response?.data);
+				showError(error.response?.data);
+			} else {
+				console.log(error);
+			}
 		}
 	};
 
@@ -79,6 +96,15 @@ const PatientInfo = () => {
 				<div>ssn: {patient.ssn}</div>
 				<div>occupation: {patient.occupation}</div>
 			</div>
+
+			{error && (
+				<Alert
+					icon={<WarningIcon fontSize="inherit" />}
+					severity="error"
+				>
+					{error}
+				</Alert>
+			)}
 
 			<div>
 				<h3>entries</h3>
